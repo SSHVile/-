@@ -7,26 +7,23 @@
     <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
     
     <style>
-        /* Variables for easy color adjustments */
+        /* --- CSS Variables --- */
         :root {
-            --desktop-bg: #1c1c24; 
+            /* Changed to Flat Black */
+            --desktop-bg: #000000; 
+            /* New Mac-style Blue Folder Color */
+            --folder-blue: #007aff; 
+            /* General Accent Colors (Kept some neon for the terminal windows) */
             --star-color: #ff4081; 
-            --folder-bg: #323d4b; 
-            --folder-border: #00ff9c; 
             --terminal-bg: #1a1a1a;
             --terminal-border: #ff4081; 
             --terminal-text: #00ff9c; 
-            --prompt-user: #c592ff; 
-            --prompt-path: #66ffcc; 
             --white-text: #f0f0f0;
-            --red-control: #ff5f56;
-            --yellow-control: #ffbd2e;
-            --green-control: #27c93f;
-            --dock-bg: #202028;
-            --dock-shadow: rgba(0, 0, 0, 0.5);
+            --dock-bg: rgba(20, 20, 20, 0.8); /* Semi-transparent dark dock */
             --font-family: 'Share Tech Mono', monospace;
         }
 
+        /* --- Base Reset and Desktop --- */
         * {
             box-sizing: border-box;
             margin: 0;
@@ -38,47 +35,94 @@
             overflow: hidden; 
         }
 
-        /* --- Desktop Background and Dynamic Stars Container --- */
         .desktop {
             position: relative;
             width: 100vw;
             height: 100vh;
-            background-color: var(--desktop-bg);
+            background-color: var(--desktop-bg); /* Flat black background */
             font-family: var(--font-family);
             color: var(--terminal-text);
-            background-image: radial-gradient(circle at center, #2e2e3f 1%, var(--desktop-bg) 100%);
         }
 
-        /* Styling for the dynamic star elements */
+        /* --- Star Trail Effect (Unchanged) --- */
         .star-trail {
             position: absolute;
-            width: 10px; 
-            height: 10px;
-            background: transparent;
-            border-radius: 50%;
-            pointer-events: none; 
-            opacity: 1;
-            z-index: 10;
-            
-            box-shadow: 
-                0 0 1px 1px currentColor,
-                0 0 5px currentColor,
-                0 0 10px currentColor;
-
+            width: 10px; height: 10px;
+            background: transparent; border-radius: 50%;
+            pointer-events: none; opacity: 1; z-index: 10;
+            box-shadow: 0 0 1px 1px currentColor, 0 0 5px currentColor, 0 0 10px currentColor;
             animation: fadeAndShrink 0.8s ease-out forwards;
         }
-
         @keyframes fadeAndShrink {
             0% { transform: scale(1); opacity: 1; }
             100% { transform: scale(0); opacity: 0; }
         }
 
-        /* --- Top Bar and Dock Z-index --- */
-        .top-bar, .dock {
+        /* --- Top Menu Bar (Mac-style) --- */
+        .top-bar {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 5px 15px;
+            background-color: rgba(0, 0, 0, 0.6); /* Dark translucent look */
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
             z-index: 100;
+            color: var(--white-text);
+            font-size: 0.8em;
+            backdrop-filter: blur(10px);
+        }
+        .menu-left {
+            display: flex;
+            gap: 15px;
+        }
+        .menu-right {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+        .menu-item {
+            cursor: pointer;
+            padding: 2px 5px;
+        }
+        
+        /* System User Menu (New Feature) */
+        .user-menu {
+            position: relative;
+        }
+        .user-menu-icon {
+            cursor: pointer;
+            font-size: 1.2em;
+        }
+        .dropdown {
+            display: none;
+            position: absolute;
+            top: 25px;
+            right: 0;
+            background-color: rgba(30, 30, 30, 0.95);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 5px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+            min-width: 150px;
+            padding: 5px 0;
+            z-index: 101;
+        }
+        .dropdown.active {
+            display: block;
+        }
+        .dropdown-item {
+            padding: 8px 15px;
+            cursor: pointer;
+            color: var(--white-text);
+        }
+        .dropdown-item:hover {
+            background-color: var(--folder-blue);
         }
 
-        /* --- Folder Icons (Unchanged) --- */
+        /* --- Folders/Icons --- */
         .folder-area {
             position: absolute;
             top: 50px; 
@@ -99,147 +143,180 @@
             user-select: none;
         }
 
+        /* Mac-Style Blue Folder Icon */
         .folder-icon {
             width: 50px;
             height: 50px;
-            background-color: var(--folder-bg);
-            border: 1px solid var(--folder-border);
-            box-shadow: 0 0 5px var(--folder-border);
+            background-color: var(--folder-blue);
+            border: 1px solid rgba(0, 0, 0, 0.2);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
             border-radius: 5px;
             display: flex;
             justify-content: center;
             align-items: center;
             margin-bottom: 5px;
             position: relative;
+            /* Creates the subtle folder tab look */
+            clip-path: polygon(0 0, 15% 0, 20% 5px, 100% 5px, 100% 100%, 0 100%); 
         }
         .folder-icon:after {
-            content: '💻'; 
+            content: '📂'; /* Neutral emoji works well with the blue background */
             position: absolute;
             font-size: 2em;
-            filter: drop-shadow(0 0 2px var(--folder-border));
+            color: #fff;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
         }
 
         .folder-text {
             color: var(--white-text);
             font-size: 0.9em;
-            padding: 2px 0;
+            padding: 2px 5px;
+            border-radius: 3px;
+        }
+        .folder-group:hover .folder-text {
+            background-color: var(--folder-blue);
         }
 
-        /* --- Terminal Windows --- */
+        /* --- Window Styles (Terminal and Folder) --- */
         .terminal-container {
             position: absolute;
             top: 50px;
-            right: 20px;
-            left: 20px; /* Extend container to support absolute positioning across the whole desktop */
+            right: 0;
+            left: 0; 
             bottom: 60px;
         }
 
-        .terminal-window {
+        .window {
             background-color: var(--terminal-bg);
             border: 2px solid var(--terminal-border);
             box-shadow: 0 0 10px rgba(255, 64, 129, 0.8), 0 0 20px rgba(0, 255, 156, 0.4);
-            position: absolute; /* Essential for dragging */
+            position: absolute; 
             width: 450px;
             min-height: 150px;
             z-index: 20; 
             font-size: 0.85em;
-            resize: both; /* Allow resizing */
+            resize: both; 
             overflow: hidden;
             min-width: 200px;
             min-height: 50px;
+            display: block; /* Default to visible */
         }
         
-        /* New CSS for minimized state */
-        .terminal-window.minimized {
-            width: 200px;
-            height: 30px;
-            min-height: 30px;
-            overflow: hidden;
-            border-bottom: none;
+        /* Mac-Style Folder Window */
+        .folder-window {
+            background-color: #2c2c2c; /* Lighter dark gray */
+            border: 1px solid #555;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+            color: var(--white-text);
+        }
+        .folder-window .window-header {
+            background-color: #444;
+            border-bottom: 1px solid #555;
+        }
+        .folder-window .window-title-bar {
+            color: #ccc;
+        }
+        .folder-window .window-controls .control.red,
+        .folder-window .window-controls .control.yellow,
+        .folder-window .window-controls .control.green {
+            /* Standard Mac window controls colors */
+            background-color: #ff5f56;
+            border-color: #e04443;
+        }
+        .folder-window .window-controls .control.yellow { background-color: #ffbd2e; border-color: #cc9933; }
+        .folder-window .window-controls .control.green { background-color: #27c93f; border-color: #1aa260; }
+
+        .folder-content {
+            padding: 15px;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+        }
+        .placeholder-item {
+            text-align: center;
             cursor: pointer;
         }
-        .terminal-window.minimized .window-header {
-            border-bottom: none;
+        .placeholder-icon {
+            font-size: 2.5em;
+            margin-bottom: 5px;
         }
-        .terminal-window.minimized .terminal-content {
-            display: none;
+
+        /* Minimized State */
+        .window.minimized {
+            width: 200px; height: 30px; min-height: 30px; overflow: hidden; border-bottom: none; cursor: pointer;
         }
+        .window.minimized .window-header { border-bottom: none; }
+        .window.minimized .terminal-content, .window.minimized .folder-content { display: none; }
         
-        /* Draggable Header Area */
+        /* Header and Controls */
         .window-header {
             background-color: #2a2a2a;
             padding: 5px;
             display: flex;
             align-items: center;
             border-bottom: 1px solid var(--terminal-border);
-            cursor: grab; /* Indicates draggable area */
+            cursor: grab; 
         }
-
-        .window-controls {
-            display: flex;
-            gap: 5px;
-            margin-right: 10px;
-        }
-
-        .control {
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-            display: inline-block;
-            cursor: pointer;
-        }
-        .control.red { background-color: var(--red-control); }
-        .control.yellow { background-color: var(--yellow-control); }
-        .control.green { background-color: var(--green-control); }
-
+        .window-controls { display: flex; gap: 5px; margin-right: 10px; }
+        .control { width: 12px; height: 12px; border-radius: 50%; display: inline-block; cursor: pointer; }
+        .control.red { background-color: #ff5f56; }
+        .control.yellow { background-color: #ffbd2e; }
+        .control.green { background-color: #27c93f; }
         .window-title-bar {
-            color: var(--white-text);
-            text-align: center;
-            flex-grow: 1;
-            font-weight: bold;
-            user-select: none; /* Prevent text selection during drag */
+            color: var(--white-text); text-align: center; flex-grow: 1; font-weight: bold; user-select: none;
         }
 
-        .terminal-content {
-            padding: 10px;
-            white-space: pre-wrap; 
-        }
-
+        /* Terminal specific content */
+        .terminal-content { padding: 10px; white-space: pre-wrap; }
         .line { margin-bottom: 2px; line-height: 1.2; }
         .prompt { color: var(--prompt-user); }
         .prompt:before { content: 'user@vile-host://window '; color: var(--prompt-path); }
         .white-text { color: var(--white-text); }
-        .output-line { color: var(--terminal-text); text-indent: 10px; }
         .cursor { /* Blink effect CSS remains */ }
 
-        /* Positioning Terminals */
-        .terminal-1 { top: 0; left: 600px; }
-        .terminal-2 { top: 250px; left: 650px; box-shadow: 0 0 8px rgba(255, 64, 129, 0.5), 0 0 15px rgba(0, 255, 156, 0.2); }
-        .terminal-3 { top: 500px; left: 20px; width: 400px; z-index: 30; }
+        /* Initial Window Positions */
+        .terminal-1 { top: 100px; left: 600px; }
+        .terminal-2 { top: 350px; left: 650px; }
+        .terminal-3 { top: 500px; left: 50px; width: 400px; z-index: 30; }
+        /* Placeholder for a new folder window */
+        #folder-about { display: none; top: 150px; left: 200px; width: 500px; height: 350px; }
 
-        /* --- Bottom Dock (Unchanged) --- */
+        /* --- Bottom Dock --- */
         .dock {
-            position: fixed; bottom: 0; left: 0; width: 100%; padding: 10px 0;
-            background-color: var(--dock-bg); display: flex; justify-content: center;
-            z-index: 100; box-shadow: 0 -5px 15px var(--dock-shadow);
+            position: fixed;
+            bottom: 5px; /* Lifted slightly off the bottom edge */
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 10px 15px;
+            background-color: var(--dock-bg);
+            border-radius: 10px;
+            display: flex;
+            justify-content: center;
+            z-index: 100;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(10px); /* Blurry Mac-style dock */
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
 
-        .dock-separator {
-            position: absolute; top: 0; left: 50%; transform: translateX(-50%);
-            width: 150px; height: 2px; background-color: var(--star-color);
-            box-shadow: 0 0 5px var(--star-color);
-        }
-
-        .dock-icons { display: flex; gap: 15px; }
+        .dock-icons { display: flex; gap: 10px; }
         .dock-icon {
-            width: 40px; height: 40px; background-color: var(--folder-bg);
-            border: 1px solid var(--prompt-path); border-radius: 5px; display: flex;
-            justify-content: center; align-items: center; font-size: 1.5em;
-            cursor: pointer; color: var(--white-text);
+            width: 45px; height: 45px; 
+            background-color: rgba(255, 255, 255, 0.1);
+            border: 1px solid transparent; 
+            border-radius: 10px; 
+            display: flex;
+            justify-content: center;
+            align-items: center; 
+            font-size: 1.8em;
+            cursor: pointer; 
+            color: var(--white-text);
+            transition: transform 0.2s ease-out;
+        }
+        .dock-icon:hover {
+            transform: scale(1.2); /* Zoom effect on hover */
         }
         .dock-icon.active {
-            border-color: var(--terminal-border); box-shadow: 0 0 8px var(--terminal-border);
-            background-color: #3e4854;
+            box-shadow: 0 0 5px var(--terminal-border);
         }
     </style>
 </head>
@@ -247,22 +324,59 @@
 
     <div class="desktop" id="desktop">
         <div class="top-bar">
-            <span class="window-title">index.html</span>
-            <span class="site-title">~~vile_personal site</span>
-            <span class="search-icon">🔍</span>
+            <div class="menu-left">
+                <span class="menu-item site-title">~~vile_personal site</span>
+                <span class="menu-item" data-action="new-page" data-page="about">About</span>
+                <span class="menu-item" data-action="new-page" data-page="projects">Projects</span>
+            </div>
+            <div class="menu-right">
+                <span class="menu-item">🔍</span>
+                <div class="user-menu">
+                    <span class="user-menu-icon" id="user-menu-btn">👤</span>
+                    <div class="dropdown" id="user-dropdown">
+                        <div class="dropdown-item" data-action="system">System Settings</div>
+                        <div class="dropdown-item" data-action="lock">Lock Screen</div>
+                        <div class="dropdown-item" data-action="logout">Log Out</div>
+                    </div>
+                </div>
+            </div>
         </div>
         
         <div class="folder-area">
-            <div class="folder-group"><div class="folder-icon"></div><div class="folder-text">About Me</div></div>
-            <div class="folder-group"><div class="folder-icon"></div><div class="folder-text">About Me</div></div>
-            <div class="folder-group"><div class="folder-icon"></div><div class="folder-text">Projects</div></div>
-            <div class="folder-group"><div class="folder-icon"></div><div class="folder-text">My Projects</div></div>
-            <div class="folder-group"><div class="folder-icon"></div><div class="folder-text">Contact Info</div></div>
-            <div class="folder-group"><div class="folder-icon"></div><div class="folder-text">Contact Info</div></div>
+            <div class="folder-group" data-target-window="folder-about">
+                <div class="folder-icon"></div>
+                <div class="folder-text">About Me</div>
+            </div>
+            <div class="folder-group" data-target-window="t1">
+                <div class="folder-icon"></div>
+                <div class="folder-text">Terminal Log</div>
+            </div>
+            <div class="folder-group" data-target-window="t2">
+                <div class="folder-icon"></div>
+                <div class="folder-text">Project Plan</div>
+            </div>
         </div>
 
         <div class="terminal-container">
-            <div class="terminal-window terminal-1" data-window-id="t1">
+            
+            <div class="window folder-window" id="folder-about" data-window-id="folder-about">
+                <div class="window-header">
+                    <div class="window-controls">
+                        <span class="control red close-btn" data-target="folder-about"></span>
+                        <span class="control yellow minimize-btn" data-target="folder-about"></span>
+                        <span class="control green"></span>
+                    </div>
+                    <span class="window-title-bar">About Me</span>
+                </div>
+                <div class="folder-content">
+                    <div class="placeholder-item"><div class="placeholder-icon">📝</div>Placeholder_Bio.txt</div>
+                    <div class="placeholder-item"><div class="placeholder-icon">🖼️</div>Picture_of_Me.jpg</div>
+                    <div class="placeholder-item"><div class="placeholder-icon">🔗</div>Links.html</div>
+                    <div class="placeholder-item"><div class="placeholder-icon">🔒</div>Secret_Files</div>
+                </div>
+            </div>
+
+            <div class="window terminal-window" data-window-id="t1">
                 <div class="window-header">
                     <div class="window-controls">
                         <span class="control red close-btn" data-target="t1"></span>
@@ -278,7 +392,7 @@
                 </div>
             </div>
 
-            <div class="terminal-window terminal-2" data-window-id="t2">
+            <div class="window terminal-window" data-window-id="t2">
                 <div class="window-header">
                     <div class="window-controls">
                         <span class="control red close-btn" data-target="t2"></span>
@@ -294,7 +408,7 @@
                 </div>
             </div>
 
-            <div class="terminal-window terminal-3" data-window-id="t3">
+            <div class="window terminal-window" data-window-id="t3" style="display: none;">
                 <div class="window-header">
                     <div class="window-controls">
                         <span class="control red close-btn" data-target="t3"></span>
@@ -314,26 +428,69 @@
         </div>
 
         <div class="dock">
-            <div class="dock-separator"></div>
             <div class="dock-icons">
-                <div class="dock-icon" data-window-id="t1" data-action="toggle">🗃️</div>
-                <div class="dock-icon" data-window-id="t2" data-action="toggle">🗃️</div>
-                <div class="dock-icon" data-window-id="t3" data-action="toggle">🗃️</div>
-                <div class="dock-icon active">🗎</div>
-                <div class="dock-icon">📂</div>
-                <div class="dock-icon">⬇️</div>
-                <div class="dock-icon">🕓</div>
-                <div class="dock-icon">👤</div>
+                <div class="dock-icon" data-window-id="folder-about" data-action="toggle">📂</div>
+                <div class="dock-icon" data-window-id="t1" data-action="toggle">💻</div>
+                <div class="dock-icon" data-window-id="t2" data-action="toggle">💬</div>
+                <div class="dock-icon" data-window-id="t3" data-action="toggle">⬇️</div>
+                <div class="dock-icon" data-action="external" data-link="https://google.com">🌐</div>
             </div>
         </div>
     </div>
 
     <script>
-        // --- Star Trail Effect ---
+        // --- Shared Window Management Variables ---
+        const terminalContainer = document.querySelector('.terminal-container');
+        const windows = document.querySelectorAll('.window');
+        let currentZIndex = 50; 
+
+        // --- Utility Functions ---
+
+        /** Sets the target window to the highest z-index. */
+        function bringToFront(windowElement) {
+            currentZIndex++;
+            windowElement.style.zIndex = currentZIndex;
+        }
+
+        /** Toggles the minimized/visible state of a window. */
+        const toggleMinimizeWindow = (windowId) => {
+            const targetWindow = document.querySelector(`.window[data-window-id="${windowId}"]`);
+            if (!targetWindow) return;
+
+            bringToFront(targetWindow);
+
+            if (targetWindow.style.display === 'none') {
+                // Restore/Show from closed state
+                targetWindow.style.display = 'block';
+                targetWindow.classList.remove('minimized');
+            } else if (targetWindow.classList.contains('minimized')) {
+                // Restore from minimized
+                targetWindow.classList.remove('minimized');
+            } else {
+                // Minimize
+                targetWindow.classList.add('minimized');
+            }
+        };
+
+        /** Opens the target window if it's closed, otherwise brings it to front. */
+        const openWindow = (windowId) => {
+            const targetWindow = document.querySelector(`.window[data-window-id="${windowId}"]`);
+            if (targetWindow) {
+                targetWindow.style.display = 'block';
+                targetWindow.classList.remove('minimized');
+                bringToFront(targetWindow);
+            } else {
+                // Simulate navigation for new pages/external links
+                console.log(`Simulating navigation to: ${windowId}`);
+                // In a real app, this would change the content or load a new view
+                alert(`Navigating to simulated page: ${windowId}`);
+            }
+        };
+
+        // --- 1. Star Trail Effect (Mouse Movement) ---
+
         document.addEventListener('mousemove', (e) => {
-            const colors = [
-                '#ff4081', '#00ff9c', '#c592ff', '#ffbd2e'
-            ];
+            const colors = ['#ff4081', '#00ff9c', '#c592ff', '#ffbd2e'];
             const color = colors[Math.floor(Math.random() * colors.length)];
             const star = document.createElement('div');
             star.classList.add('star-trail');
@@ -347,28 +504,7 @@
             }, 800);
         });
 
-        // --- Window Interactivity (Drag, Close, Minimize) ---
-
-        const terminalWindows = document.querySelectorAll('.terminal-window');
-        const dockIcons = document.querySelectorAll('.dock-icon[data-action="toggle"]');
-        let currentZIndex = 30; // Start Z-index higher than static elements
-
-        terminalWindows.forEach(window => {
-            const header = window.querySelector('.window-header');
-            makeWindowDraggable(window, header);
-            
-            // Bring to front on click
-            window.addEventListener('mousedown', () => {
-                bringToFront(window);
-            });
-        });
-
-        function bringToFront(windowElement) {
-            currentZIndex++;
-            windowElement.style.zIndex = currentZIndex;
-        }
-
-        // 1. Dragging Functionality
+        // --- 2. Window Dragging ---
         function makeWindowDraggable(windowElement, dragHandle) {
             let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
             
@@ -376,98 +512,129 @@
 
             function dragMouseDown(e) {
                 e = e || window.event;
+                // Only allow dragging if the window is not minimized
+                if (windowElement.classList.contains('minimized')) return;
+
                 e.preventDefault();
-                // Get the mouse cursor position at startup:
                 pos3 = e.clientX;
                 pos4 = e.clientY;
                 document.onmouseup = closeDragElement;
-                // Call a function whenever the cursor moves:
                 document.onmousemove = elementDrag;
-                
-                // Bring to front when dragging starts
                 bringToFront(windowElement);
             }
 
             function elementDrag(e) {
                 e = e || window.event;
                 e.preventDefault();
-                // Calculate the new cursor position:
                 pos1 = pos3 - e.clientX;
                 pos2 = pos4 - e.clientY;
                 pos3 = e.clientX;
                 pos4 = e.clientY;
                 
-                // Set the element's new position:
                 let newTop = windowElement.offsetTop - pos2;
                 let newLeft = windowElement.offsetLeft - pos1;
 
-                // Simple boundary check (prevents dragging off the top/left edge)
-                newTop = Math.max(0, newTop);
-                newLeft = Math.max(0, newLeft);
+                // Simple boundary check
+                newTop = Math.max(0, Math.min(newTop, terminalContainer.offsetHeight - windowElement.offsetHeight));
+                newLeft = Math.max(0, Math.min(newLeft, terminalContainer.offsetWidth - windowElement.offsetWidth));
 
                 windowElement.style.top = newTop + "px";
                 windowElement.style.left = newLeft + "px";
             }
 
             function closeDragElement() {
-                // Stop moving when mouse button is released:
                 document.onmouseup = null;
                 document.onmousemove = null;
             }
         }
 
-        // 2. Closing Functionality
-        document.querySelectorAll('.close-btn').forEach(button => {
-            button.addEventListener('click', (e) => {
-                e.stopPropagation(); // Prevent drag starting
-                const targetId = e.target.getAttribute('data-target');
-                const targetWindow = document.querySelector(`.terminal-window[data-window-id="${targetId}"]`);
-                
-                if (targetWindow) {
-                    targetWindow.style.display = 'none';
-                }
+        // --- 3. Click Handlers and Initialization ---
+
+        // Initialize drag and bring to front for all windows
+        windows.forEach(window => {
+            const header = window.querySelector('.window-header');
+            makeWindowDraggable(window, header);
+            
+            window.addEventListener('mousedown', () => {
+                bringToFront(window);
             });
         });
 
-        // 3. Minimizing/Toggle Functionality (Yellow Control and Dock)
-        const minimizeAndToggle = (targetId) => {
-            const targetWindow = document.querySelector(`.terminal-window[data-window-id="${targetId}"]`);
-            
-            if (targetWindow) {
-                bringToFront(targetWindow); // Ensure it's on top when restored/toggled
+        // Close and Minimize Buttons
+        document.querySelectorAll('.close-btn').forEach(button => {
+            button.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const targetId = e.target.getAttribute('data-target');
+                const targetWindow = document.querySelector(`.window[data-window-id="${targetId}"]`);
+                if (targetWindow) targetWindow.style.display = 'none';
+            });
+        });
 
-                if (targetWindow.style.display === 'none') {
-                    // Restore/Show
-                    targetWindow.style.display = 'block';
-                    targetWindow.classList.remove('minimized');
-                } 
-                else if (targetWindow.classList.contains('minimized')) {
-                    // Restore from minimized
-                    targetWindow.classList.remove('minimized');
-                } 
-                else {
-                    // Minimize
-                    targetWindow.classList.add('minimized');
-                }
-            }
-        };
-
-        // Yellow Minimize Button Handler
         document.querySelectorAll('.minimize-btn').forEach(button => {
             button.addEventListener('click', (e) => {
                 e.stopPropagation();
                 const targetId = e.target.getAttribute('data-target');
-                minimizeAndToggle(targetId);
+                toggleMinimizeWindow(targetId);
             });
         });
 
-        // Dock Icon Toggle Handler
-        dockIcons.forEach(icon => {
-            icon.addEventListener('click', (e) => {
-                const targetId = e.target.getAttribute('data-window-id');
-                minimizeAndToggle(targetId);
+        // Folder Icons (Launch Windows)
+        document.querySelectorAll('.folder-group').forEach(group => {
+            group.addEventListener('dblclick', (e) => {
+                const targetId = group.getAttribute('data-target-window');
+                openWindow(targetId);
             });
         });
+
+        // Dock Icons (Toggle Windows and External Links)
+        document.querySelectorAll('.dock-icon').forEach(icon => {
+            icon.addEventListener('click', (e) => {
+                const action = icon.getAttribute('data-action');
+                
+                if (action === 'toggle') {
+                    const targetId = icon.getAttribute('data-window-id');
+                    toggleMinimizeWindow(targetId);
+                } else if (action === 'external') {
+                    const link = icon.getAttribute('data-link');
+                    // Opens external link in a new tab
+                    window.open(link, '_blank'); 
+                }
+            });
+        });
+
+        // Top Menu Bar Navigation
+        document.querySelectorAll('.menu-item[data-action="new-page"]').forEach(item => {
+            item.addEventListener('click', (e) => {
+                const page = item.getAttribute('data-page');
+                openWindow(page); 
+            });
+        });
+
+        // System User Menu Toggle
+        const userMenuBtn = document.getElementById('user-menu-btn');
+        const userDropdown = document.getElementById('user-dropdown');
+
+        userMenuBtn.addEventListener('click', (e) => {
+            e.stopPropagation(); // Prevent the body listener from closing immediately
+            userDropdown.classList.toggle('active');
+        });
+
+        // Close dropdown when clicking outside
+        document.body.addEventListener('click', () => {
+            if (userDropdown.classList.contains('active')) {
+                userDropdown.classList.remove('active');
+            }
+        });
+        
+        // System Menu Actions
+        document.querySelectorAll('.dropdown-item').forEach(item => {
+            item.addEventListener('click', (e) => {
+                const action = item.getAttribute('data-action');
+                alert(`Action simulated: ${action}`);
+                userDropdown.classList.remove('active');
+            });
+        });
+
     </script>
 </body>
 </html>
