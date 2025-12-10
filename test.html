@@ -1,233 +1,153 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Research OS</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Research‑Mac Desktop</title>
 <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/color-thief/2.3.0/color-thief.umd.js"></script>
 <style>
-    body {
-        background: url('https://wallpaperaccess.com/full/317501.jpg') no-repeat center center fixed;
-        background-size: cover;
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
-        overflow: hidden;
-    }
-    .desktop-icon {
-        width: 60px;
-        text-align: center;
-        margin: 10px;
-        cursor: pointer;
-    }
-    .desktop-icon:hover {
-        transform: scale(1.1);
-        transition: 0.2s;
-    }
-    .finder-window {
-        display: none;
-        position: absolute;
-        top: 100px;
-        left: 100px;
-        width: 500px;
-        min-width: 300px;
-        min-height: 200px;
-        background: rgba(255,255,255,0.95);
-        border-radius: 12px;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-        overflow: hidden;
-        z-index: 100;
-    }
-    .finder-header {
-        height: 30px;
-        background: #e0e0e0;
-        display: flex;
-        align-items: center;
-        padding: 0 10px;
-        cursor: move;
-        user-select: none;
-    }
-    .finder-header div {
-        display: flex;
-        gap: 6px;
-    }
-    .finder-body {
-        padding: 10px;
-        overflow-y: auto;
-        max-height: 400px;
-    }
-    .folder-item {
-        display: flex;
-        align-items: center;
-        margin-bottom: 10px;
-        cursor: pointer;
-    }
-    .folder-item img {
-        width: 50px;
-        height: 50px;
-        margin-right: 10px;
-    }
-    .folder-item div {
-        display: flex;
-        flex-direction: column;
-    }
-    .tab-bar {
-        position: fixed;
-        bottom: 0;
-        left: 0;
-        width: 100%;
-        background: rgba(0,0,0,0.6);
-        display: flex;
-        justify-content: start;
-        align-items: center;
-        padding: 5px 10px;
-    }
-    .tab-icon {
-        width: 40px;
-        height: 40px;
-        margin: 0 5px;
-        cursor: pointer;
-    }
-    #clock {
-        position: fixed;
-        top: 10px;
-        right: 20px;
-        color: white;
-        font-weight: bold;
-        font-size: 16px;
-        text-shadow: 1px 1px 3px black;
-    }
+  html, body { margin:0; padding:0; width:100%; height:100%; overflow:hidden;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    background: url('https://wallpaperaccess.com/full/317501.jpg') center/cover no-repeat;
+    user-select: none;
+  }
+  #menubar {
+    position: fixed; top:0; left:0; right:0; height:30px;
+    background: rgba(0,0,0,0.4); color: white; display: flex;
+    align-items: center; justify-content: space-between; padding: 0 12px;
+    font-size: 13px; z-index: 1000;
+  }
+  #clock { margin-right: 12px; }
+  #desktop {
+    position: absolute; top:30px; bottom: 60px; left:0; right:0;
+    padding: 10px; display: flex; flex-wrap: wrap;
+    gap: 12px;
+  }
+  .icon {
+    width: 64px; cursor: pointer; text-align: center;
+    color: white; font-size: 11px; user-select: none;
+  }
+  .icon img {
+    width: 48px; height: 48px; display: block; margin: 0 auto;
+  }
+  #dock {
+    position: fixed; bottom:0; left:50%; transform: translateX(-50%);
+    height:60px; padding: 6px 12px; background: rgba(0,0,0,0.3);
+    border-radius: 12px; display: flex; align-items: flex-end;
+    gap: 10px; z-index: 999;
+  }
+  .dock-icon {
+    width: 48px; height: 48px; cursor: pointer; position: relative;
+    transition: transform .15s;
+  }
+  .dock-icon:hover { transform: scale(1.25); }
+  .window {
+    position: absolute; background: rgba(255,255,255,0.95);
+    border-radius: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    overflow: hidden; min-width: 200px; min-height: 150px;
+    z-index: 200;
+  }
+  .window .titlebar {
+    height: 26px; background: rgba(200,200,200,0.95); display: flex;
+    align-items:center; padding: 0 8px; cursor: grab;
+  }
+  .win-btn { width:12px; height:12px; border-radius:50%; margin-right:6px; }
+  .close { background: #ff5f57; }
+  .min { background: #ffbd2e; }
+  .max { background: #28c840; }
+  .content { padding: 8px; max-height: 400px; overflow: auto; }
 </style>
 </head>
 <body>
+  <div id="menubar">
+    <div> Research‑Mac</div>
+    <div id="clock"></div>
+  </div>
 
-<div id="clock"></div>
+  <div id="desktop">
+    <!-- Example desktop icons -->
+    <div class="icon" data-app="Finder"><img src="https://cdn-icons-png.flaticon.com/512/724/724972.png"><div>Finder</div></div>
+    <div class="icon" data-app="Safari"><img src="https://cdn-icons-png.flaticon.com/512/731/731985.png"><div>Safari</div></div>
+    <div class="icon" data-app="Mail"><img src="https://cdn-icons-png.flaticon.com/512/732/732200.png"><div>Mail</div></div>
+    <div class="icon" data-app="Notes"><img src="https://cdn-icons-png.flaticon.com/512/732/732217.png"><div>Notes</div></div>
+    <div class="icon" data-app="Calendar"><img src="https://cdn-icons-png.flaticon.com/512/747/747310.png"><div>Calendar</div></div>
+    <div class="icon" data-app="Photos"><img src="https://cdn-icons-png.flaticon.com/512/1170/1170329.png"><div>Photos</div></div>
+    <div class="icon" data-app="Music"><img src="https://cdn-icons-png.flaticon.com/512/731/731977.png"><div>Music</div></div>
+    <div class="icon" data-app="Terminal"><img src="https://cdn-icons-png.flaticon.com/512/933/933579.png"><div>Terminal</div></div>
+    <!-- Add more as needed -->
+  </div>
 
-<div id="desktop" class="flex flex-wrap p-4">
-    <!-- Desktop Icons -->
-    <div class="desktop-icon" onclick="openFinder('researchFinder')">
-        <img src="https://img.icons8.com/fluency/96/folder-invoices.png" alt="Research">
-        <div>Research</div>
-    </div>
-    <div class="desktop-icon" onclick="openFinder('articlesFinder')">
-        <img src="https://img.icons8.com/fluency/96/folder-invoices.png" alt="Articles">
-        <div>Articles</div>
-    </div>
-    <div class="desktop-icon">
-        <img src="https://img.icons8.com/fluency/96/safari.png" alt="Safari">
-        <div>Safari</div>
-    </div>
-    <div class="desktop-icon">
-        <img src="https://img.icons8.com/fluency/96/mail.png" alt="Mail">
-        <div>Mail</div>
-    </div>
-</div>
+  <div id="dock">
+    <!-- same icons for dock -->
+    <div class="dock-icon" data-app="Finder"><img src="https://cdn-icons-png.flaticon.com/512/724/724972.png" width="48"></div>
+    <div class="dock-icon" data-app="Safari"><img src="https://cdn-icons-png.flaticon.com/512/731/731985.png" width="48"></div>
+    <div class="dock-icon" data-app="Mail"><img src="https://cdn-icons-png.flaticon.com/512/732/732200.png" width="48"></div>
+    <div class="dock-icon" data-app="Notes"><img src="https://cdn-icons-png.flaticon.com/512/732/732217.png" width="48"></div>
+    <div class="dock-icon" data-app="Calendar"><img src="https://cdn-icons-png.flaticon.com/512/747/747310.png" width="48"></div>
+    <div class="dock-icon" data-app="Photos"><img src="https://cdn-icons-png.flaticon.com/512/1170/1170329.png" width="48"></div>
+    <div class="dock-icon" data-app="Music"><img src="https://cdn-icons-png.flaticon.com/512/731/731977.png" width="48"></div>
+    <div class="dock-icon" data-app="Terminal"><img src="https://cdn-icons-png.flaticon.com/512/933/933579.png" width="48"></div>
+  </div>
 
-<!-- Finder Windows -->
-<div id="researchFinder" class="finder-window">
-    <div class="finder-header">
-        <div>
-            <div style="width:12px;height:12px;border-radius:50%;background:#ff5f57;"></div>
-            <div style="width:12px;height:12px;border-radius:50%;background:#ffbd2e;"></div>
-            <div style="width:12px;height:12px;border-radius:50%;background:#28c840;"></div>
-        </div>
-        <div style="margin-left: 10px;">Research</div>
-    </div>
-    <div class="finder-body">
-        <div class="folder-item">
-            <img src="https://img.icons8.com/fluency/48/pdf.png" alt="Paper 1">
-            <div>
-                <span>Paper 1.pdf</span>
-                <small>2025 Research on AI</small>
-            </div>
-        </div>
-        <div class="folder-item">
-            <img src="https://img.icons8.com/fluency/48/pdf.png" alt="Paper 2">
-            <div>
-                <span>Paper 2.pdf</span>
-                <small>Quantum Computing Study</small>
-            </div>
-        </div>
-    </div>
-</div>
-
-<div id="articlesFinder" class="finder-window">
-    <div class="finder-header">
-        <div>
-            <div style="width:12px;height:12px;border-radius:50%;background:#ff5f57;"></div>
-            <div style="width:12px;height:12px;border-radius:50%;background:#ffbd2e;"></div>
-            <div style="width:12px;height:12px;border-radius:50%;background:#28c840;"></div>
-        </div>
-        <div style="margin-left: 10px;">Articles</div>
-    </div>
-    <div class="finder-body">
-        <div class="folder-item">
-            <img src="https://img.icons8.com/fluency/48/document.png" alt="Article 1">
-            <div>
-                <span>Article 1</span>
-                <small>New AI breakthroughs</small>
-            </div>
-        </div>
-        <div class="folder-item">
-            <img src="https://img.icons8.com/fluency/48/document.png" alt="Article 2">
-            <div>
-                <span>Article 2</span>
-                <small>Climate change insights</small>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Tab Bar -->
-<div class="tab-bar">
-    <img src="https://img.icons8.com/fluency/96/folder-invoices.png" class="tab-icon" onclick="openFinder('researchFinder')">
-    <img src="https://img.icons8.com/fluency/96/folder-invoices.png" class="tab-icon" onclick="openFinder('articlesFinder')">
-    <img src="https://img.icons8.com/fluency/96/safari.png" class="tab-icon">
-</div>
-
-<script>
-    // Clock
-    function updateClock() {
-        const now = new Date();
-        const hours = now.getHours().toString().padStart(2,'0');
-        const minutes = now.getMinutes().toString().padStart(2,'0');
-        const seconds = now.getSeconds().toString().padStart(2,'0');
-        const date = now.toLocaleDateString();
-        document.getElementById('clock').innerText = `${hours}:${minutes}:${seconds} | ${date}`;
+  <script>
+    // clock
+    function updateClock(){
+      const d=new Date();
+      document.getElementById('clock').textContent = d.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) 
+        + ' ' + d.toLocaleDateString();
     }
     setInterval(updateClock, 1000);
     updateClock();
 
-    // Open Finder
-    function openFinder(id) {
-        const win = document.getElementById(id);
-        win.style.display = 'block';
-        win.style.zIndex = ++maxZ;
+    let highestZ = 300;
+
+    function openWindow(appName){
+      const win = document.createElement('div');
+      win.className = 'window';
+      win.style.width = '400px'; win.style.height = '300px';
+      win.style.left = Math.random()*200 + 'px';
+      win.style.top = Math.random()*200 + 'px';
+      win.style.zIndex = ++highestZ;
+
+      const titlebar = document.createElement('div');
+      titlebar.className = 'titlebar';
+      titlebar.innerHTML = '<div style="display:flex;"><div class="win-btn close"></div><div class="win-btn min"></div><div class="win-btn max"></div></div><div style="margin-left:8px;">'+appName+'</div>';
+      win.appendChild(titlebar);
+
+      const content = document.createElement('div');
+      content.className = 'content';
+      content.innerHTML = `<p>This is the <strong>${appName}</strong> window.</p>`;
+      win.appendChild(content);
+
+      document.body.appendChild(win);
+
+      // drag
+      let dragging=false, offX=0, offY=0;
+      titlebar.addEventListener('mousedown',(e)=>{
+        dragging=true; offX = e.clientX - win.offsetLeft; offY = e.clientY - win.offsetTop;
+        win.style.zIndex = ++highestZ;
+      });
+      document.addEventListener('mousemove',(e)=>{
+        if(dragging){
+          win.style.left = (e.clientX - offX)+'px';
+          win.style.top = (e.clientY - offY)+'px';
+        }
+      });
+      document.addEventListener('mouseup',()=>dragging=false);
+
+      // buttons
+      titlebar.querySelector('.close').onclick = ()=> win.remove();
+      titlebar.querySelector('.min').onclick = ()=> win.style.display = 'none';
+      titlebar.querySelector('.max').onclick = ()=> {
+        win.style.width = '90%'; win.style.height = '80%';
+        win.style.left = '5%'; win.style.top = '5%';
+      };
     }
 
-    // Draggable Finder
-    let maxZ = 100;
-    document.querySelectorAll('.finder-header').forEach(header => {
-        let isDragging = false;
-        let offsetX, offsetY;
-        const win = header.parentElement;
-
-        header.addEventListener('mousedown', (e) => {
-            isDragging = true;
-            offsetX = e.clientX - win.offsetLeft;
-            offsetY = e.clientY - win.offsetTop;
-            win.style.zIndex = ++maxZ;
-        });
-        document.addEventListener('mousemove', (e) => {
-            if (isDragging) {
-                win.style.left = (e.clientX - offsetX) + 'px';
-                win.style.top = (e.clientY - offsetY) + 'px';
-            }
-        });
-        document.addEventListener('mouseup', () => {
-            isDragging = false;
-        });
+    document.querySelectorAll('.icon, .dock-icon').forEach(el=>{
+      el.addEventListener('dblclick', ()=> openWindow(el.dataset.app));
+      el.addEventListener('click', ()=> { /* single‑click could open/ highlight */ });
     });
-</script>
-
+  </script>
 </body>
 </html>
