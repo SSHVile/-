@@ -1,818 +1,144 @@
 <!DOCTYPE html>
 <html lang="en">
-<!-- © 2025 macOS Style Webpage. Created by Hamza Atig - my website: atig.me . This project is a visual recreation inspired by Apple's macOS. All trademarks are property of their respective owners. -->
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>QuantumOS - Pinnacle Edition (Enhanced)</title>
-
-  <!-- PRESERVED EXTERNAL LINKS -->
-  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/color-thief/2.3.0/color-thief.umd.js"></script>
-
-  <style>
-    /* Base layout */
-    :root{
-      --glass-bg-start: rgba(30,25,25,0.4);
-      --glass-bg-end: rgba(30,25,25,0.2);
-      --glass-border: rgba(255,255,255,0.1);
-      --accent: #60a5fa;
-    }
-    html,body{height:100%; margin:0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;}
-    body{background-color:#0b1220; background-size:cover; background-position:center; overflow:hidden; user-select:none; color:#e5e7eb;}
-    .backdrop {position:fixed; inset:0; pointer-events:none; z-index:0;}
-    /* header bar */
-    header.menubar{position:fixed; top:0; left:0; right:0; height:36px; display:flex; align-items:center; justify-content:space-between; padding:0 12px; background:rgba(0,0,0,0.25); backdrop-filter: blur(8px); z-index:80;}
-    header .left, header .right{display:flex; align-items:center; gap:8px;}
-    .nav-item{padding:6px 8px; border-radius:6px; cursor:pointer;}
-    .nav-item:hover{background:rgba(255,255,255,0.04);}
-    /* dock */
-    footer.dock{position:fixed; left:50%; transform:translateX(-50%); bottom:18px; z-index:70; pointer-events:auto;}
-    .dock-inner{display:flex; gap:10px; background:linear-gradient(180deg, rgba(255,255,255,0.03), rgba(0,0,0,0.3)); padding:10px 14px; border-radius:16px; backdrop-filter: blur(12px); box-shadow:0 10px 30px rgba(2,6,23,0.6);}
-    .dock-icon{width:56px; height:56px; display:flex; align-items:center; justify-content:center; border-radius:10px; transition:transform .12s ease, box-shadow .12s ease; cursor:pointer; position:relative;}
-    .dock-icon img{width:44px; height:44px; object-fit:contain;}
-    .dock-icon .indicator{position:absolute; bottom:-8px; left:50%; transform:translateX(-50%); width:8px; height:8px; border-radius:999px; background:var(--accent); box-shadow:0 0 8px rgba(96,165,250,0.6); opacity:0; transition:opacity .15s;}
-    .dock-icon.active .indicator{opacity:1;}
-    /* dock magnify */
-    .dock-inner:hover .dock-icon{transform:scale(1);}
-    .dock-inner{transition:all .06s}
-    /* desktop area */
-    #desktop{position:relative; width:100vw; height:100vh; z-index:1; overflow:hidden;}
-    #desktop .icon-grid{position:absolute; left:20px; top:60px; display:flex; flex-direction:column; gap:18px; z-index:5;}
-    .desktop-folder{width:84px; text-align:center; color:#e5e7eb; cursor:pointer; user-select:none; position:relative;}
-    .desktop-folder img{width:64px; height:64px; object-fit:contain; filter:drop-shadow(0 6px 12px rgba(0,0,0,0.6)); transition:transform .12s;}
-    .desktop-folder:hover img{transform:translateY(-6px);}
-    .folder-label{font-size:12px; margin-top:6px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
-    /* app window */
-    .app-window{position:absolute; border-radius:12px; overflow:hidden; background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.45)); box-shadow:0 18px 40px rgba(2,6,23,0.6); border:1px solid rgba(255,255,255,0.06); z-index:40; transform-origin:center; transition:transform .12s ease, opacity .12s;}
-    .app-window .titlebar{height:36px; display:flex; align-items:center; gap:8px; padding:0 12px; background:rgba(255,255,255,0.02); border-bottom:1px solid rgba(255,255,255,0.03); cursor:grab;}
-    .title-controls{display:flex; gap:8px; align-items:center;}
-    .title-circle{width:12px;height:12px;border-radius:999px;}
-    .close{background:#ff5f57;}
-    .min{background:#ffbd2d;}
-    .max{background:#28c840;}
-    .app-content{padding:12px; height:calc(100% - 36px); overflow:auto;}
-    .hidden{display:none;}
-    .active-window{box-shadow:0 24px 60px rgba(2,6,23,0.75); transform:translateY(-6px);}
-    /* folder template */
-    .finder-sidebar{width:160px; border-right:1px solid rgba(255,255,255,0.04); height:100%; padding:12px; box-sizing:border-box;}
-    .finder-list-item{padding:8px 10px; border-radius:8px; display:flex; gap:8px; align-items:center; cursor:pointer;}
-    .finder-list-item:hover{background:rgba(255,255,255,0.02);}
-    .finder-thumbs{display:grid; grid-template-columns:repeat(auto-fill, 88px); gap:12px; padding:12px;}
-    .thumb{width:88px; height:88px; background:rgba(0,0,0,0.25); border-radius:8px; overflow:hidden; display:flex; align-items:center; justify-content:center; position:relative; cursor:grab;}
-    .thumb img{width:100%; height:100%; object-fit:cover;}
-    .thumb .file-label{position:absolute; bottom:6px; left:6px; right:6px; font-size:11px; color:white; text-shadow:0 1px 2px rgba(0,0,0,0.6);}
-    /* launchpad */
-    .launchpad{position:fixed; inset:0; display:flex; align-items:center; justify-content:center; z-index:120; backdrop-filter: blur(6px); background:rgba(0,0,0,0.45); opacity:0; pointer-events:none; transition:opacity .12s;}
-    .launchpad.active{opacity:1; pointer-events:all;}
-    .launch-grid{width:86vw; max-width:1100px; background:rgba(255,255,255,0.02); padding:26px; border-radius:14px; display:grid; grid-template-columns:repeat(8,1fr); gap:18px;}
-    .app-card{width:92%; margin:0 auto; aspect-ratio:1/1; background:rgba(255,255,255,0.02); border-radius:16px; display:flex; align-items:center; justify-content:center; flex-direction:column; padding:8px; cursor:pointer;}
-    .app-card img{width:48px; height:48px;}
-    .app-card span{font-size:12px; margin-top:6px;}
-    /* spotlight */
-    .spotlight{position:fixed; top:10%; left:50%; transform:translateX(-50%); width:60vw; max-width:760px; z-index:150; background:rgba(15,23,42,0.9); border-radius:12px; padding:12px; box-shadow:0 20px 50px rgba(2,6,23,0.6); display:none;}
-    .spotlight.active{display:block;}
-    .spot-input{width:100%; padding:12px; background:transparent; border:none; color:white; font-size:18px; outline:none;}
-    .spot-results{max-height:280px; overflow:auto;}
-    .spot-item{padding:8px 10px; border-radius:8px; cursor:pointer;}
-    .spot-item:hover{background:rgba(255,255,255,0.02);}
-    /* mission control */
-    .mission{position:fixed; inset:0; z-index:130; background:rgba(0,0,0,0.6); display:none; padding:20px; box-sizing:border-box; overflow:auto;}
-    .mission.active{display:block;}
-    .mission-grid{display:flex; gap:12px; flex-wrap:wrap; align-items:flex-start;}
-    .mission-window{width:220px; height:140px; background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.5)); border-radius:10px; overflow:hidden; box-shadow:0 6px 18px rgba(0,0,0,0.5); cursor:pointer; transform-origin:center; transition:transform .12s;}
-    /* widgets */
-    .widget{position:absolute; width:220px; background:rgba(255,255,255,0.02); border-radius:12px; padding:12px; color:white; cursor:grab; box-shadow:0 8px 30px rgba(0,0,0,0.5); z-index:60;}
-    /* lock / login */
-    .lockscreen{position:fixed; inset:0; z-index:400; background:linear-gradient(180deg, rgba(3,7,18,0.7), rgba(3,7,18,0.88)); display:flex; align-items:center; justify-content:center; flex-direction:column; gap:10px; color:white; display:none;}
-    .lockscreen.active{display:flex;}
-    .login-box{background:rgba(255,255,255,0.03); padding:20px; border-radius:12px;}
-    /* notifications */
-    .notifications{position:fixed; right:20px; top:80px; display:flex; flex-direction:column; gap:8px; z-index:220;}
-    .toast{background:rgba(25,28,34,0.95); padding:10px 12px; border-radius:10px; box-shadow:0 10px 30px rgba(0,0,0,0.6); color:white; width:320px;}
-    /* context menu */
-    .ctx{position:fixed; z-index:500; background:rgba(12,14,20,0.95); border-radius:8px; padding:6px 0; display:none; min-width:160px; box-shadow:0 10px 30px rgba(0,0,0,0.6);}
-    .ctx .opt{padding:8px 12px; cursor:pointer; color:white;}
-    .ctx .opt:hover{background:rgba(255,255,255,0.03);}
-    /* small helpers */
-    .btn{padding:8px 12px; border-radius:8px; cursor:pointer;}
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Research OS</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/color-thief/2.3.0/color-thief.umd.js"></script>
+    <style>
+        body {
+            background: url('https://wallpaperaccess.com/full/317501.jpg') no-repeat center center fixed;
+            background-size: cover;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+            overflow: hidden;
+        }
+        .desktop-icon {
+            width: 60px;
+            text-align: center;
+            margin: 10px;
+            cursor: pointer;
+        }
+        .folder-menu {
+            display: none;
+            position: absolute;
+            top: 60px;
+            left: 20px;
+            width: 300px;
+            background: rgba(255,255,255,0.95);
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            padding: 10px;
+            z-index: 100;
+        }
+        .tab-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: rgba(0,0,0,0.6);
+            display: flex;
+            justify-content: start;
+            align-items: center;
+            padding: 5px 10px;
+        }
+        .tab-icon {
+            width: 40px;
+            height: 40px;
+            margin: 0 5px;
+            cursor: pointer;
+        }
+        #clock {
+            position: fixed;
+            top: 10px;
+            right: 20px;
+            color: white;
+            font-weight: bold;
+            font-size: 16px;
+            text-shadow: 1px 1px 3px black;
+        }
+    </style>
 </head>
 <body>
+    <!-- Time & Date -->
+    <div id="clock"></div>
 
-  <!-- BACKGROUND IMAGE SOURCE (for ColorThief) -->
-  <img id="bg-image-source" src="https://4kwallpapers.com/images/walls/thumbs_3t/1432.jpg" crossorigin="anonymous" style="display:none" alt="bg">
-
-  <!-- MENUBAR -->
-  <header class="menubar">
-    <div class="left">
-      <div class="nav-item" id="finderBtn">Finder</div>
-      <div class="nav-item" id="fileBtn">File</div>
-      <div class="nav-item" id="editBtn">Edit</div>
-      <div class="nav-item" id="spotBtn">Spotlight ⌘</div>
-      <div class="nav-item" id="missionBtn">Mission Control</div>
-    </div>
-    <div class="right">
-      <div id="timeDisplay"></div>
-    </div>
-  </header>
-
-  <!-- DESKTOP -->
-  <main id="desktop">
-    <div class="icon-grid" id="iconGrid">
-      <!-- Desktop folders (draggable) -->
-      <div class="desktop-folder" data-name="Projects" style="left:20px; top:64px;">
-        <img src="https://upload.wikimedia.org/wikipedia/commons/3/34/Blue_folder_icon.svg" alt="folder">
-        <div class="folder-label">Projects</div>
-      </div>
-      <div class="desktop-folder" data-name="Media" style="left:20px; top:160px;">
-        <img src="https://upload.wikimedia.org/wikipedia/commons/3/34/Blue_folder_icon.svg" alt="folder">
-        <div class="folder-label">Media</div>
-      </div>
-    </div>
-
-    <!-- Widgets -->
-    <div class="widget" id="clockWidget" style="right:28px; top:64px;">
-      <div style="font-size:22px" id="widgetTime">12:00</div>
-      <div style="font-size:12px; opacity:0.8" id="widgetDate">Wed, Jan 1</div>
-    </div>
-
-    <div class="widget" id="notesWidget" style="left:28px; bottom:140px;">
-      <div style="font-weight:600; margin-bottom:6px">Quick Note</div>
-      <textarea id="quickNote" style="width:100%; height:80px; background:transparent; border:none; color:white; outline:none; resize:none"></textarea>
-      <div style="display:flex; justify-content:flex-end; margin-top:6px">
-        <button class="btn" id="saveQuick">Save</button>
-      </div>
-    </div>
-  </main>
-
-  <!-- DOCK -->
-  <footer class="dock">
-    <div class="dock-inner" id="dockInner">
-      <div class="dock-icon" id="dockFinder" data-app="finder">
-        <img src="https://icons.iconarchive.com/icons/wineass/ios7-redesign/256/Safari-icon.png" alt="finder">
-        <div class="indicator"></div>
-      </div>
-      <div class="dock-icon" id="dockLaunch" data-app="launchpad">
-        <img src="https://cdn-icons-png.flaticon.com/512/709/709586.png" alt="launchpad">
-        <div class="indicator"></div>
-      </div>
-      <div class="dock-icon" id="dockSafari" data-app="safari">
-        <img src="https://icons.iconarchive.com/icons/custom-icon-design/mono-general-2/256/browser-icon.png" alt="safari">
-        <div class="indicator"></div>
-      </div>
-      <div class="dock-icon" id="dockMusic" data-app="music">
-        <img src="https://cdn-icons-png.flaticon.com/512/727/727245.png" alt="music">
-        <div class="indicator"></div>
-      </div>
-      <div class="dock-icon" id="dockSettings" data-app="settings">
-        <img src="https://cdn-icons-png.flaticon.com/512/3524/3524659.png" alt="settings">
-        <div class="indicator"></div>
-      </div>
-
-      <div style="width:12px"></div>
-
-      <div class="dock-icon" id="dockTrash" data-app="trash">
-        <img src="https://cdn-icons-png.flaticon.com/512/2089/2089792.png" alt="trash">
-        <div class="indicator"></div>
-      </div>
-    </div>
-  </footer>
-
-  <!-- APP WINDOW TEMPLATE (hidden container that will be cloned) -->
-  <template id="appWindowTemplate">
-    <div class="app-window" style="width:860px; height:640px; left:80px; top:90px;">
-      <div class="titlebar">
-        <div class="title-controls" style="display:flex; gap:8px;">
-          <div class="title-circle close"></div>
-          <div class="title-circle min"></div>
-          <div class="title-circle max"></div>
+    <!-- Desktop -->
+    <div id="desktop" class="flex flex-wrap p-4">
+        <div class="desktop-icon" onclick="toggleFolder('researchFolder')">
+            <img src="https://img.icons8.com/fluency/96/folder-invoices.png" alt="Research Folder">
+            <div>Research</div>
         </div>
-        <div class="title-text" style="margin-left:8px; font-weight:600;">App</div>
-      </div>
-      <div class="app-content">App content</div>
-    </div>
-  </template>
-
-  <!-- FINDER / FOLDER TEMPLATE -->
-  <template id="finderTemplate">
-    <div class="app-window finder-window" style="width:720px; height:480px;">
-      <div class="titlebar">
-        <div class="title-controls" style="display:flex; gap:8px;">
-          <div class="title-circle close"></div>
-          <div class="title-circle min"></div>
-          <div class="title-circle max"></div>
+        <div class="desktop-icon" onclick="toggleFolder('articlesFolder')">
+            <img src="https://img.icons8.com/fluency/96/folder-invoices.png" alt="Articles Folder">
+            <div>Articles</div>
         </div>
-        <div class="title-text" style="margin-left:8px; font-weight:600;">Finder</div>
-      </div>
-      <div class="app-content" style="display:flex; height:calc(100% - 36px);">
-        <div class="finder-sidebar">
-          <div class="finder-list-item" data-quick="home">🏠 Home</div>
-          <div class="finder-list-item" data-quick="favorites">⭐ Favorites</div>
-          <div class="finder-list-item" data-quick="documents">📄 Documents</div>
-          <div class="finder-list-item" data-quick="music">🎵 Music</div>
-          <div class="finder-list-item" data-quick="videos">🎥 Videos</div>
+        <!-- Example app icons -->
+        <div class="desktop-icon">
+            <img src="https://img.icons8.com/fluency/96/safari.png" alt="Browser">
+            <div>Browser</div>
         </div>
-        <div style="flex:1; padding:12px; overflow:auto;">
-          <div class="finder-thumbs" id="finderThumbs"></div>
+        <div class="desktop-icon">
+            <img src="https://img.icons8.com/fluency/96/notepad.png" alt="Notes">
+            <div>Notes</div>
         </div>
-      </div>
     </div>
-  </template>
 
-  <!-- LAUNCHPAD -->
-  <div class="launchpad" id="launchpad">
-    <div class="launch-grid" id="launchGrid">
-      <!-- apps will be generated -->
+    <!-- Folder Menus -->
+    <div id="researchFolder" class="folder-menu">
+        <h3 class="font-bold">Research Folder</h3>
+        <ul>
+            <li><a href="#" class="text-blue-600 hover:underline">Paper 1.pdf</a></li>
+            <li><a href="#" class="text-blue-600 hover:underline">Paper 2.pdf</a></li>
+            <li><a href="#" class="text-blue-600 hover:underline">Dataset.xlsx</a></li>
+        </ul>
     </div>
-  </div>
 
-  <!-- SPOTLIGHT -->
-  <div class="spotlight" id="spotlight">
-    <input placeholder="Spotlight — search apps, folders, files..." class="spot-input" id="spotInput">
-    <div class="spot-results" id="spotResults"></div>
-  </div>
-
-  <!-- MISSION CONTROL -->
-  <div class="mission" id="mission">
-    <div style="display:flex; gap:12px; align-items:flex-start; flex-wrap:wrap;" id="missionGrid"></div>
-  </div>
-
-  <!-- LOCK SCREEN -->
-  <div class="lockscreen" id="lockscreen">
-    <div style="font-size:36px; font-weight:700">QuantumOS</div>
-    <div class="login-box" id="loginBox">
-      <div style="margin-bottom:8px;">draco</div>
-      <input id="pass" type="password" placeholder="Password" style="padding:8px 10px; border-radius:8px; border:none; outline:none; background:rgba(255,255,255,0.03); color:white;">
-      <div style="margin-top:10px; display:flex; gap:8px; justify-content:flex-end;">
-        <button class="btn" id="unlockBtn">Unlock</button>
-      </div>
+    <div id="articlesFolder" class="folder-menu">
+        <h3 class="font-bold">Articles Folder</h3>
+        <ul>
+            <li><a href="#" class="text-blue-600 hover:underline">Article 1</a></li>
+            <li><a href="#" class="text-blue-600 hover:underline">Article 2</a></li>
+            <li><a href="#" class="text-blue-600 hover:underline">Article 3</a></li>
+        </ul>
     </div>
-  </div>
 
-  <!-- NOTIFICATIONS -->
-  <div class="notifications" id="notifications"></div>
+    <!-- Tab Bar -->
+    <div class="tab-bar">
+        <img src="https://img.icons8.com/fluency/96/folder-invoices.png" class="tab-icon" onclick="toggleFolder('researchFolder')">
+        <img src="https://img.icons8.com/fluency/96/safari.png" class="tab-icon">
+        <img src="https://img.icons8.com/fluency/96/notepad.png" class="tab-icon">
+        <img src="https://img.icons8.com/fluency/96/settings.png" class="tab-icon">
+    </div>
 
-  <!-- CONTEXT MENU -->
-  <div class="ctx" id="desktopCtx">
-    <div class="opt" id="ctxNew">New Folder</div>
-    <div class="opt" id="ctxRefresh">Refresh</div>
-  </div>
-
-  <!-- AUDIO SAMPLE -->
-  <audio id="musicSample" src="https://cdn.pixabay.com/download/audio/2021/08/08/audio_8e6a7a5f2f.mp3?filename=retro-wave-110588.mp3"></audio>
-
-  <script>
-    /**************
-     * Helpers & state
-     **************/
-    const state = {
-      windows: [], // {id, el, app}
-      files: {
-        Projects: [{name:'mockup.png', src:'https://picsum.photos/200/200?random=21'}, {name:'README.md', src:null}],
-        Media: [{name:'cover.jpg', src:'https://picsum.photos/200/200?random=8'}]
-      },
-      notifications: []
-    };
-
-    // Utilities
-    const $ = s => document.querySelector(s);
-    const $$ = s => Array.from(document.querySelectorAll(s));
-    const makeId = (p='w') => p + Math.random().toString(36).slice(2,9);
-
-    /**************
-     * Wallpaper + Adaptive colors (Color Thief preserved)
-     **************/
-    const bgImg = document.getElementById('bg-image-source');
-    function applyAdaptiveColors() {
-      try {
-        const ct = new ColorThief();
-        const c = ct.getColor(bgImg);
-        document.documentElement.style.setProperty('--glass-bg-start', `rgba(${c[0]},${c[1]},${c[2]},0.45)`);
-        document.documentElement.style.setProperty('--glass-bg-end', `rgba(${Math.max(c[0]-20,0)},${Math.max(c[1]-20,0)},${Math.max(c[2]-20,0)},0.2)`);
-        document.documentElement.style.setProperty('--glass-border', `rgba(${Math.min(c[0]+50,255)},${Math.min(c[1]+50,255)},${Math.min(c[2]+50,255)},0.25)`);
-        // set accent near blue-ish derived color
-        document.documentElement.style.setProperty('--accent', `rgba(${Math.min(c[0]+60,255)},${Math.min(c[1]+90,255)},${Math.min(c[2]+200,255)},1)`);
-      } catch (e) { console.warn('ColorThief failed',e); }
-    }
-    if (bgImg.complete) applyAdaptiveColors(); else bgImg.onload = applyAdaptiveColors;
-    // apply background
-    function setWallpaper(url) {
-      document.body.style.backgroundImage = `url('${url}')`;
-      bgImg.src = url;
-      applyAdaptiveColors();
-      notify('Wallpaper changed');
-    }
-
-    /**************
-     * Time display + widget
-     **************/
-    function updateTime() {
-      const now = new Date();
-      const opts = {weekday:'short', month:'short', day:'numeric', hour:'numeric', minute:'numeric', hour12:true};
-      $('#timeDisplay').textContent = new Intl.DateTimeFormat('en-US', opts).format(now).replace(/,/g,'');
-      $('#widgetTime').textContent = now.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
-      $('#widgetDate').textContent = now.toLocaleDateString([], {weekday:'short', month:'short', day:'numeric'});
-    }
-    updateTime(); setInterval(updateTime,1000);
-
-    /**************
-     * Notifications
-     **************/
-    function notify(msg, ttl=3500) {
-      const id = makeId('n');
-      const el = document.createElement('div');
-      el.className = 'toast'; el.id = id;
-      el.textContent = msg;
-      $('#notifications').appendChild(el);
-      setTimeout(()=>el.remove(), ttl);
-      state.notifications.push({id,msg});
-    }
-
-    /**************
-     * Simple storage for notes
-     **************/
-    const quickNote = $('#quickNote');
-    $('#saveQuick').onclick = () => {
-      localStorage.setItem('quickNote', quickNote.value || '');
-      notify('Quick note saved');
-    }
-    quickNote.value = localStorage.getItem('quickNote') || '';
-
-    /**************
-     * Desktop folder behavior
-     **************/
-    function makeDraggable(el) {
-      el.onmousedown = function(e) {
-        // only left mouse
-        if (e.button !== 0) return;
-        let shiftX = e.clientX - el.getBoundingClientRect().left;
-        let shiftY = e.clientY - el.getBoundingClientRect().top;
-        el.style.position = 'absolute';
-        el.style.zIndex = 50;
-        function move(e) {
-          el.style.left = Math.max(8, e.clientX - shiftX) + 'px';
-          el.style.top = Math.max(44, e.clientY - shiftY) + 'px';
+    <script>
+        // Clock
+        function updateClock() {
+            const now = new Date();
+            const hours = now.getHours().toString().padStart(2,'0');
+            const minutes = now.getMinutes().toString().padStart(2,'0');
+            const seconds = now.getSeconds().toString().padStart(2,'0');
+            const date = now.toLocaleDateString();
+            document.getElementById('clock').innerText = `${hours}:${minutes}:${seconds} | ${date}`;
         }
-        document.addEventListener('mousemove', move);
-        document.onmouseup = function() {
-          document.removeEventListener('mousemove', move);
-          document.onmouseup = null;
-          el.style.zIndex = '';
+        setInterval(updateClock, 1000);
+        updateClock();
+
+        // Folder toggle
+        function toggleFolder(id) {
+            const folder = document.getElementById(id);
+            folder.style.display = folder.style.display === 'block' ? 'none' : 'block';
         }
-      }
-    }
-    $$('.desktop-folder').forEach(fd => {
-      makeDraggable(fd);
-      // double click to open
-      fd.ondblclick = () => openFinderWith(fd.dataset.name);
-      // context menu
-      fd.oncontextmenu = e=> {
-        e.preventDefault();
-        showCtx(e.pageX, e.pageY, [{label:'Open',action:()=>openFinderWith(fd.dataset.name)},{label:'Rename',action:()=>renameFolder(fd)}]);
-      }
-    });
 
-    function renameFolder(el) {
-      const old = el.dataset.name;
-      const newName = prompt('Rename folder', old);
-      if (newName && newName.trim()) {
-        el.dataset.name = newName.trim();
-        el.querySelector('.folder-label').textContent = newName.trim();
-        // simple move in state.files
-        state.files[newName] = state.files[old] || [];
-        delete state.files[old];
-        notify(`Renamed to ${newName}`);
-      }
-    }
-
-    /**************
-     * Finder / Folder windows
-     **************/
-    const template = $('#finderTemplate').content;
-    function openFinderWith(folderName='Home') {
-      const node = template.cloneNode(true).firstElementChild;
-      const id = makeId('finder');
-      node.dataset.id = id;
-      node.querySelector('.title-text').textContent = folderName;
-      // fill thumbnails based on state.files
-      const thumbs = node.querySelector('#finderThumbs') || node.querySelector('.finder-thumbs');
-      if (thumbs) {
-        thumbs.innerHTML = '';
-        const files = state.files[folderName] || [];
-        if (files.length === 0) {
-          thumbs.innerHTML = '<div style="color:#9ca3af">Folder is empty</div>';
-        } else {
-          files.forEach(f=>{
-            const t = document.createElement('div'); t.className = 'thumb';
-            if (f.src) {
-              const img = document.createElement('img'); img.src = f.src; t.appendChild(img);
-            } else {
-              t.style.display='flex'; t.style.alignItems='center'; t.style.justifyContent='center'; t.textContent = f.name;
-            }
-            const lbl = document.createElement('div'); lbl.className='file-label'; lbl.textContent = f.name;
-            t.appendChild(lbl);
-            // allow drag to trash
-            t.draggable = true;
-            t.ondragstart = (ev)=> {
-              ev.dataTransfer.setData('text/plain', JSON.stringify({folder:folderName, name:f.name}));
-            }
-            thumbs.appendChild(t);
-          })
-        }
-      }
-      setupWindow(node);
-      document.body.appendChild(node);
-      bringToFront(node);
-      state.windows.push({id,el:node,app:'finder'});
-      updateMission();
-    }
-
-    /**************
-     * Generic window helpers
-     **************/
-    function setupWindow(win) {
-      win.style.left = (120 + Math.random()*200) + 'px';
-      win.style.top = (80 + Math.random()*120) + 'px';
-      // close
-      win.querySelectorAll('.title-circle.close').forEach(c=> c.onclick = ()=> { win.remove(); state.windows = state.windows.filter(w=>w.el!==win); updateMission(); });
-      // min (hide)
-      win.querySelectorAll('.title-circle.min').forEach(c=> c.onclick = ()=> { win.style.display='none'; });
-      // max (toggle full)
-      win.querySelectorAll('.title-circle.max').forEach(c=>{
-        c.onclick = ()=> {
-          if (win.dataset.maxed === '1') {
-            win.style.left = win.dataset.prevLeft; win.style.top = win.dataset.prevTop; win.style.width = win.dataset.prevWidth; win.style.height = win.dataset.prevHeight;
-            win.dataset.maxed='0';
-          } else {
-            win.dataset.prevLeft = win.style.left; win.dataset.prevTop = win.style.top; win.dataset.prevWidth = win.style.width; win.dataset.prevHeight = win.style.height;
-            win.style.left= '40px'; win.style.top='48px'; win.style.width = (window.innerWidth - 80)+'px'; win.style.height = (window.innerHeight - 140)+'px';
-            win.dataset.maxed='1';
-          }
-        }
-      });
-      // titlebar drag
-      const tb = win.querySelector('.titlebar');
-      tb.onmousedown = (e) => {
-        if (e.button !== 0) return;
-        const startX = e.clientX, startY = e.clientY;
-        const rect = win.getBoundingClientRect();
-        const offsetX = startX - rect.left, offsetY = startY - rect.top;
-        function move(e) {
-          win.style.left = Math.max(12, e.clientX - offsetX) + 'px';
-          win.style.top = Math.max(44, e.clientY - offsetY) + 'px';
-        }
-        document.addEventListener('mousemove', move);
-        document.onmouseup = ()=> { document.removeEventListener('mousemove', move); document.onmouseup=null; };
-        bringToFront(win);
-      }
-      // attached drag-over for trash
-      win.ondragover = (e)=>e.preventDefault();
-      win.ondrop = (e)=> {
-        e.preventDefault();
-        const data = e.dataTransfer.getData('text/plain');
-        try {
-          const obj = JSON.parse(data);
-          // if dropped into a folder window, move file into that folder
-          const folder = win.querySelector('.title-text')?.textContent || null;
-          if (folder && obj.name) {
-            // remove from origin
-            const orig = state.files[obj.folder] || [];
-            state.files[obj.folder] = orig.filter(f=>f.name!==obj.name);
-            state.files[folder] = state.files[folder] || [];
-            state.files[folder].push({name:obj.name, src:null});
-            notify(`Moved ${obj.name} to ${folder}`);
-            // refresh thumbs if present
-            const thumbs = win.querySelector('.finder-thumbs');
-            if (thumbs) {
-              openFinderRefresh(win);
-            }
-          }
-        } catch(e){}
-      }
-      // open on double click if a folder window
-    }
-
-    function openFinderRefresh(win) {
-      const folder = win.querySelector('.title-text')?.textContent || 'Home';
-      const thumbs = win.querySelector('.finder-thumbs');
-      if (!thumbs) return;
-      thumbs.innerHTML = '';
-      const files = state.files[folder] || [];
-      if (files.length === 0) thumbs.innerHTML = '<div style="color:#9ca3af">Folder is empty</div>';
-      files.forEach(f=>{
-        const t = document.createElement('div'); t.className = 'thumb';
-        if (f.src) {
-          const img = document.createElement('img'); img.src = f.src; t.appendChild(img);
-        } else {
-          t.style.display='flex'; t.style.alignItems='center'; t.style.justifyContent='center'; t.textContent = f.name;
-        }
-        const lbl = document.createElement('div'); lbl.className='file-label'; lbl.textContent = f.name;
-        t.appendChild(lbl);
-        t.draggable=true;
-        t.ondragstart = (ev)=> {
-          ev.dataTransfer.setData('text/plain', JSON.stringify({folder:folder, name:f.name}));
-        }
-        thumbs.appendChild(t);
-      })
-    }
-
-    function bringToFront(node) {
-      // z-index based ordering
-      const z = 40 + state.windows.length + 1;
-      node.style.zIndex = z;
-      node.classList.add('active-window');
-      // de-active others
-      $$('.app-window').forEach(w=>{ if (w!==node) w.classList.remove('active-window'); });
-    }
-
-    /**************
-     * Launchpad
-     **************/
-    const launchpad = $('#launchpad');
-    const apps = [
-      {id:'finder', name:'Finder', icon:'https://icons.iconarchive.com/icons/wineass/ios7-redesign/256/Safari-icon.png'},
-      {id:'safari', name:'Safari', icon:'https://icons.iconarchive.com/icons/custom-icon-design/mono-general-2/256/browser-icon.png'},
-      {id:'notes', name:'Notes', icon:'https://upload.wikimedia.org/wikipedia/commons/thumb/f/fa/Apple_Notes_icon.svg/2048px-Apple_Notes_icon.svg.png'},
-      {id:'music', name:'Music', icon:'https://cdn-icons-png.flaticon.com/512/727/727245.png'},
-      {id:'settings', name:'Settings', icon:'https://cdn-icons-png.flaticon.com/512/3524/3524659.png'}
-    ];
-    function buildLaunchpad() {
-      const grid = $('#launchGrid'); grid.innerHTML='';
-      apps.forEach(a=>{
-        const c = document.createElement('div'); c.className='app-card';
-        c.innerHTML = `<img src="${a.icon}" /><span>${a.name}</span>`;
-        c.onclick = ()=> { openApp(a.id); toggleLaunchpad(false); }
-        grid.appendChild(c);
-      })
-    }
-    buildLaunchpad();
-    function toggleLaunchpad(show) { if (show===undefined) show = !launchpad.classList.contains('active'); if (show) { launchpad.classList.add('active'); } else launchpad.classList.remove('active'); }
-
-    /**************
-     * Spotlight
-     **************/
-    const spotlight = $('#spotlight'); const spotInput = $('#spotInput'); const spotResults = $('#spotResults');
-    $('#spotBtn').onclick = ()=> { spotlight.classList.toggle('active'); spotInput.focus(); searchSpot(''); }
-    spotInput.oninput = (e)=> searchSpot(e.target.value);
-    function searchSpot(q) {
-      const term = (q||'').toLowerCase();
-      const results = [];
-      apps.forEach(a=> { if (!term || a.name.toLowerCase().includes(term)) results.push({type:'app',name:a.name,id:a.id})});
-      Object.keys(state.files).forEach(fn=>{
-        if (!term || fn.toLowerCase().includes(term)) results.push({type:'folder',name:fn});
-        (state.files[fn]||[]).forEach(f=>{
-          if (!term || f.name.toLowerCase().includes(term)) results.push({type:'file',name:f.name,folder:fn});
-        })
-      });
-      spotResults.innerHTML = results.map(r=>`<div class="spot-item" data-type="${r.type}" data-id="${r.id||''}" data-name="${r.name}" data-folder="${r.folder||''}">${r.type.toUpperCase()} — ${r.name}</div>`).join('');
-      $$('.spot-item').forEach(si=>si.onclick = ()=> {
-        const t = si.dataset.type;
-        if (t === 'app') { openApp(si.dataset.id); spotlight.classList.remove('active'); }
-        if (t === 'folder') { openFinderWith(si.dataset.name); spotlight.classList.remove('active'); }
-        if (t === 'file') { notify(`Open file ${si.dataset.name} in ${si.dataset.folder}`); spotlight.classList.remove('active'); }
-      });
-    }
-
-    /**************
-     * Mission Control
-     **************/
-    const mission = $('#mission');
-    $('#missionBtn').onclick = ()=> { mission.classList.toggle('active'); updateMission(); }
-    function updateMission() {
-      const grid = $('#missionGrid'); grid.innerHTML='';
-      const wins = $$('.app-window');
-      wins.forEach(w=>{
-        const snap = document.createElement('div'); snap.className='mission-window';
-        snap.innerHTML = `<div style="padding:8px; font-weight:600;">${w.querySelector('.title-text')?.textContent || 'App'}</div>`;
-        snap.onclick = ()=> { mission.classList.remove('active'); w.style.display='block'; bringToFront(w); }
-        grid.appendChild(snap);
-      });
-    }
-
-    /**************
-     * Launch apps & Dock behaviors
-     **************/
-    $('#dockFinder').onclick = ()=> openFinderWith('Home');
-    $('#dockLaunch').onclick = ()=> toggleLaunchpad();
-    $('#dockSafari').onclick = ()=> openApp('safari');
-    $('#dockMusic').onclick = ()=> openApp('music');
-    $('#dockSettings').onclick = ()=> openApp('settings');
-
-    function openApp(id) {
-      if (id==='finder') return openFinderWith('Home');
-      if (id==='safari') {
-        const app = createAppWindow('Safari', 900, 640);
-        app.querySelector('.app-content').innerHTML = `<div style="height:100%;"><iframe src="https://www.google.com/?igu=1" style="width:100%; height:100%; border:none;"></iframe></div>`;
-        return;
-      }
-      if (id==='notes') {
-        const app = createAppWindow('Notes', 720,480);
-        const content = `<div style="display:flex; height:100%"><div style="width:240px; border-right:1px solid rgba(255,255,255,0.04); padding:8px;"><button id="newNote" class="btn">New</button><div id="noteList" style="margin-top:8px;"></div></div><div style="flex:1; padding:8px;"><textarea id="noteBody" style="width:100%; height:100%; background:transparent; border:none; color:white; outline:none"></textarea></div></div>`;
-        app.querySelector('.app-content').innerHTML = content;
-        // simple notes localStorage
-        const notes = JSON.parse(localStorage.getItem('quantum_notes')||'[]');
-        function refreshNotes() {
-          const nl = app.querySelector('#noteList'); nl.innerHTML = notes.map((n,i)=>`<div class="btn" data-i="${i}" style="display:block; margin-bottom:6px;">${n.title||('Note '+(i+1))}</div>`).join('');
-          nl.querySelectorAll('.btn').forEach(b=>b.onclick = ()=> {
-            const idx = b.dataset.i; app.querySelector('#noteBody').value = notes[idx].body || '';
-            app.querySelector('#noteBody').dataset.idx = idx;
-          })
-        }
-        app.querySelector('#newNote').onclick = ()=> {
-          notes.unshift({title:'New Note', body:''}); localStorage.setItem('quantum_notes', JSON.stringify(notes)); refreshNotes();
-        }
-        app.querySelector('#noteBody').oninput = ()=> {
-          const idx = app.querySelector('#noteBody').dataset.idx;
-          if (idx!==undefined) { notes[idx].body = app.querySelector('#noteBody').value; localStorage.setItem('quantum_notes', JSON.stringify(notes)); }
-        }
-        refreshNotes();
-        return;
-      }
-      if (id==='music') {
-        const app = createAppWindow('Music', 520,320);
-        app.querySelector('.app-content').innerHTML = `<div style="display:flex; flex-direction:column; gap:12px;"><div>Sample Track</div><div><button id="playM" class="btn">Play</button><button id="pauseM" class="btn">Pause</button></div></div>`;
-        app.querySelector('#playM').onclick = ()=> $('#musicSample').play();
-        app.querySelector('#pauseM').onclick = ()=> $('#musicSample').pause();
-        return;
-      }
-      if (id==='settings') {
-        const app = createAppWindow('Settings', 520,420);
-        const content = `<div style="display:flex; gap:12px;"><div style="flex:1;"><h3>Wallpaper</h3><input id="wallInp" placeholder="image url" style="width:100%; padding:8px; border-radius:8px; background:transparent; border:1px solid rgba(255,255,255,0.06); color:white"/><div style="margin-top:8px"><button id="setWall" class="btn">Set</button></div></div><div style="width:240px;"><h3>Accent</h3><input id="accentInp" type="color" value="#60a5fa" style="width:100%; height:44px; border-radius:8px; border:none"/></div></div>`;
-        app.querySelector('.app-content').innerHTML = content;
-        app.querySelector('#setWall').onclick = ()=> { const url = app.querySelector('#wallInp').value.trim(); if (url) setWallpaper(url); }
-        app.querySelector('#accentInp').oninput = (e)=> document.documentElement.style.setProperty('--accent', e.target.value);
-        return;
-      }
-    }
-
-    function createAppWindow(title, w=760, h=520) {
-      const tpl = $('#appWindowTemplate').content.cloneNode(true).firstElementChild;
-      tpl.style.width = w + 'px'; tpl.style.height = h + 'px';
-      tpl.querySelector('.title-text').textContent = title;
-      setupWindow(tpl);
-      document.body.appendChild(tpl);
-      state.windows.push({id:makeId('app'), el:tpl, app:title});
-      bringToFront(tpl);
-      updateMission();
-      return tpl;
-    }
-
-    /**************
-     * Trash: accept drops
-     **************/
-    const trash = $('#dockTrash');
-    // show a highlight when drag over
-    document.addEventListener('dragover', (e)=> {
-      e.preventDefault();
-      const el = document.elementFromPoint(e.clientX,e.clientY);
-      if (el && el.closest && el.closest('#dockTrash')) trash.classList.add('active');
-    });
-    document.addEventListener('dragleave', ()=> trash.classList.remove('active'));
-    document.addEventListener('drop', (e)=> {
-      const el = document.elementFromPoint(e.clientX,e.clientY);
-      if (el && el.closest && el.closest('#dockTrash')) {
-        const data = e.dataTransfer.getData('text/plain');
-        try {
-          const obj = JSON.parse(data);
-          // remove file
-          if (obj.folder && obj.name) {
-            state.files[obj.folder] = (state.files[obj.folder]||[]).filter(f=>f.name!==obj.name);
-            notify(`${obj.name} moved to Trash`);
-          }
-        } catch(e){}
-      }
-      trash.classList.remove('active');
-    });
-
-    /**************
-     * Context menu
-     **************/
-    const ctx = $('#desktopCtx');
-    window.addEventListener('contextmenu', (e)=> {
-      e.preventDefault();
-      ctx.style.left = e.pageX + 'px'; ctx.style.top = e.pageY + 'px'; ctx.style.display='block';
-    });
-    window.addEventListener('click', ()=> { ctx.style.display='none'; });
-    $('#ctxNew').onclick = ()=> {
-      const name = prompt('New folder name','Untitled Folder') || 'Untitled Folder';
-      const el = document.createElement('div');
-      el.className = 'desktop-folder'; el.dataset.name = name;
-      el.style.left = '160px'; el.style.top = '160px';
-      el.innerHTML = `<img src="https://upload.wikimedia.org/wikipedia/commons/3/34/Blue_folder_icon.svg"><div class="folder-label">${name}</div>`;
-      document.getElementById('iconGrid').appendChild(el);
-      makeDraggable(el);
-      el.ondblclick = ()=> openFinderWith(name);
-      notify('Folder created');
-    }
-    $('#ctxRefresh').onclick = ()=> location.reload();
-
-    /**************
-     * Context quick show
-     **************/
-    function showCtx(x,y,opts=[]) {
-      const menu = document.createElement('div'); menu.className='ctx'; menu.style.left = x + 'px'; menu.style.top = y + 'px';
-      opts.forEach(o=>{
-        const it = document.createElement('div'); it.className='opt'; it.textContent = o.label; it.onclick = ()=> { o.action(); menu.remove(); };
-        menu.appendChild(it);
-      })
-      document.body.appendChild(menu);
-      setTimeout(()=>{ document.addEventListener('click', ()=> menu.remove(), {once:true}); },10);
-    }
-
-    /**************
-     * Spotlight hotkey
-     **************/
-    document.addEventListener('keydown', (e)=> {
-      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === ' ') { // Cmd/Ctrl + Space
-        e.preventDefault();
-        $('#spotlight').classList.toggle('active');
-        $('#spotInput').focus();
-      }
-      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'm') { // mission
-        $('#mission').classList.toggle('active'); updateMission();
-      }
-    });
-
-    /**************
-     * Boot animation + lockscreen
-     **************/
-    function showBoot() {
-      const boot = document.createElement('div'); boot.style.position='fixed'; boot.style.inset=0; boot.style.display='flex'; boot.style.alignItems='center'; boot.style.justifyContent='center'; boot.style.background='black'; boot.style.zIndex=9999;
-      boot.innerHTML = `<div style="color:white; text-align:center;"><div style="font-size:40px; margin-bottom:8px;">QuantumOS</div><div style="opacity:0.6">Initializing…</div></div>`;
-      document.body.appendChild(boot);
-      setTimeout(()=>{ boot.remove(); $('#lockscreen').classList.add('active'); }, 1400);
-    }
-    // On first load show boot then lock
-    setTimeout(()=> showBoot(), 300);
-
-    // unlock
-    $('#unlockBtn').onclick = ()=> {
-      $('#lockscreen').classList.remove('active');
-      notify('Welcome back, draco');
-    }
-
-    /**************
-     * Simple file rename & create within finder (context inside finder)
-     **************/
-    // When a finder opens we already fill thumbs; adding right-click to create file in folder
-    document.addEventListener('click', ()=> {
-      // global click
-    });
-
-    /**************
-     * Mission & mini updates
-     **************/
-    // refresh mission when windows change
-    setInterval(()=> {
-      updateMission();
-    }, 2200);
-
-    /**************
-     * Initial seed
-     **************/
-    // create initial windows thumbnails by opening a home finder for user to see
-    setTimeout(()=> openFinderWith('Projects'), 900);
-
-    /**************
-     * Dock hover magnify (simple)
-     **************/
-    const dockInner = document.getElementById('dockInner');
-    dockInner.addEventListener('mousemove', (e)=> {
-      const icons = dockInner.querySelectorAll('.dock-icon');
-      icons.forEach(ic=>{
-        const r = ic.getBoundingClientRect();
-        const center = r.left + r.width/2;
-        const d = Math.abs(center - e.clientX);
-        const scale = Math.max(1, Math.min(1.6, 1.6 - d/220));
-        ic.style.transform = `translateY(${(scale-1)*-18}px) scale(${scale})`;
-      })
-    });
-    dockInner.addEventListener('mouseleave', ()=> {
-      dockInner.querySelectorAll('.dock-icon').forEach(ic=> ic.style.transform = 'translateY(0) scale(1)');
-    });
-
-    /**************
-     * Trash accepts drops from external / thumbs
-     **************/
-    // already handled above with drop listener
-
-    /**************
-     * Startup ready notify
-     **************/
-    setTimeout(()=> notify('QuantumOS ready'), 2400);
-
-    /**************
-     * Make widgets draggable
-     **************/
-    $$('.widget').forEach(w => makeDraggable(w));
-
-    /**************
-     * Expose some global functions for debugging & use
-     **************/
-    window.openFinderWith = openFinderWith;
-    window.openApp = openApp;
-    window.setWallpaper = setWallpaper;
-  </script>
+        // Close folders if clicked outside
+        document.addEventListener('click', function(e) {
+            const folders = document.querySelectorAll('.folder-menu');
+            folders.forEach(f => {
+                if (!f.contains(e.target) && !e.target.closest('.desktop-icon') && !e.target.closest('.tab-icon')) {
+                    f.style.display = 'none';
+                }
+            });
+        });
+    </script>
 </body>
 </html>
