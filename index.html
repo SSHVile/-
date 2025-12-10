@@ -3,240 +3,462 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>~/.vile_personal_site</title>
+    <title>~vile_personal site</title>
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
     
     <style>
-        /* --- CSS Styles --- */
-        
+        /* Variables for easy color adjustments */
         :root {
-            --bg-color: #121212; /* Dark background */
-            --text-color: #00ff00; /* Green terminal text */
-            --accent-color: #00cc00; /* Slightly different green for prompts */
-            --window-border: #333;
-            --star-colors: #ff7f00, #ff00ff, #00ffff, #ffff00; /* Colorful stars */
+            --desktop-bg: #1c1c24; /* Dark purple/black background */
+            --star-color: #ff4081; /* Pink/magenta neon for stars */
+            --folder-bg: #323d4b; /* Dark folder background */
+            --folder-border: #00ff9c; /* Green neon border */
+            --terminal-bg: #1a1a1a;
+            --terminal-border: #ff4081; /* Pink border */
+            --terminal-text: #00ff9c; /* Green text */
+            --prompt-user: #c592ff; /* Purple for user/host */
+            --prompt-path: #66ffcc; /* Lighter green/cyan for path */
+            --white-text: #f0f0f0;
+            --red-control: #ff5f56;
+            --yellow-control: #ffbd2e;
+            --green-control: #27c93f;
+            --dock-bg: #202028;
+            --dock-shadow: rgba(0, 0, 0, 0.5);
+            --font-family: 'Share Tech Mono', monospace;
         }
 
-        /* Global Styles */
-        body {
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            font-family: 'Courier New', monospace; /* Monospaced font for the terminal look */
+        * {
+            box-sizing: border-box;
             margin: 0;
-            padding: 20px;
-            display: flex;
-            justify-content: center;
-            align-items: flex-start;
-            min-height: 100vh;
-            overflow: hidden; /* Prevent scrollbars due to stars */
+            padding: 0;
         }
 
-        /* Terminal Window Styling */
-        .terminal-window {
-            width: 80%;
-            max-width: 800px;
-            border: 1px solid var(--window-border);
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
-            background-color: #1e1e1e; /* Slightly lighter dark for the terminal */
-            border-radius: 8px;
-            overflow: hidden;
-            margin-top: 5vh;
-            z-index: 10; /* Ensure terminal is above stars */
+        html, body {
+            height: 100%;
+            overflow: hidden; /* Hide scrollbars for the desktop view */
+        }
+
+        /* --- Desktop Background and Dynamic Stars Container --- */
+        .desktop {
             position: relative;
+            width: 100vw;
+            height: 100vh;
+            background-color: var(--desktop-bg);
+            font-family: var(--font-family);
+            color: var(--terminal-text);
+            /* Radial gradient to mimic a subtle glow/center focus */
+            background-image: radial-gradient(circle at center, #2e2e3f 1%, var(--desktop-bg) 100%);
         }
 
-        header {
-            background-color: var(--window-border);
-            padding: 5px 10px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid #444;
-        }
-
-        .window-title {
-            font-size: 0.9em;
-            color: #ccc;
-        }
-
-        .window-controls .control-btn {
-            display: inline-block;
-            width: 12px;
-            height: 12px;
+        /* Styling for the dynamic star elements */
+        .star-trail {
+            position: absolute;
+            width: 10px; /* Size of the star */
+            height: 10px;
+            background: transparent;
             border-radius: 50%;
-            margin-left: 5px;
+            pointer-events: none; /* Crucial: Allows clicking through the stars */
+            opacity: 1;
+            z-index: 10;
+            
+            /* Using box-shadow for the star shape and glow */
+            box-shadow: 
+                0 0 1px 1px currentColor,
+                0 0 5px currentColor,
+                0 0 10px currentColor;
+
+            /* Animation to make them fade and shrink */
+            animation: fadeAndShrink 0.8s ease-out forwards;
         }
 
-        .minimize { background-color: #ffbd4a; }
-        .maximize { background-color: #00ca4e; }
-        .close { background-color: #ff605c; }
-
-        /* Terminal Body Content */
-        .terminal-body {
-            padding: 15px;
-            white-space: pre-wrap;
-            line-height: 1.4;
-            font-size: 1em;
+        @keyframes fadeAndShrink {
+            0% {
+                transform: scale(1);
+                opacity: 1;
+            }
+            100% {
+                transform: scale(0);
+                opacity: 0;
+            }
         }
 
-        .prompt {
-            color: var(--accent-color);
-            margin-right: 5px;
-        }
-
-        .output {
-            margin: 5px 0 10px 0;
-            padding-left: 15px; /* Indent output slightly */
-        }
-
-        pre.output {
-            background-color: #151515; /* Subtle dark background for file list */
-            padding: 10px;
-            border-left: 2px solid var(--accent-color);
-            overflow-x: auto;
-        }
-
-        .links {
-            list-style-type: none;
-            padding-left: 15px;
-        }
-
-        .links li a {
-            color: var(--text-color);
-            text-decoration: none;
-            transition: color 0.3s;
-        }
-
-        .links li a:hover {
-            color: var(--accent-color);
-            text-decoration: underline;
-        }
-
-        /* Animated Cursor */
-        .cursor {
-            animation: blink-caret 1s step-end infinite;
-            font-weight: bold;
-            color: var(--text-color);
-        }
-
-        @keyframes blink-caret {
-            from, to { color: transparent }
-            50% { color: var(--text-color) }
-        }
-
-        /* Star Effect Container */
-        #star-field {
-            position: fixed;
+        /* --- Top Bar (index.html) --- */
+        .top-bar {
+            position: absolute;
             top: 0;
             left: 0;
             width: 100%;
-            height: 100%;
-            pointer-events: none; /* Allows clicks to pass through the stars */
-            z-index: 1; /* Keep it behind the main content */
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 5px 15px;
+            background-color: var(--dock-bg);
+            border-bottom: 1px solid #333;
+            z-index: 100;
+            color: var(--white-text);
+            font-size: 0.8em;
+        }
+        .site-title {
+            color: var(--prompt-path);
+            font-style: italic;
+        }
+        .search-icon {
+            font-size: 1.2em;
         }
 
-        /* Individual Star Styling (Initial state before JS animation) */
-        .star {
+        /* --- Folder Icons --- */
+        .folder-area {
             position: absolute;
-            width: 4px;
-            height: 4px;
-            border-radius: 50%;
-            opacity: 0;
-            transform: scale(0);
+            top: 50px; /* Below top bar */
+            left: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            z-index: 5;
         }
 
-        /* Star Fall Animation */
-        @keyframes fall {
-            to {
-                transform: translate(var(--end-x), var(--end-y)) scale(0);
-                opacity: 0;
-            }
+        .folder-group {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            cursor: pointer;
+            text-align: center;
+            width: 120px; 
+            user-select: none;
+        }
+
+        .folder-icon {
+            width: 50px;
+            height: 50px;
+            background-color: var(--folder-bg);
+            border: 1px solid var(--folder-border);
+            box-shadow: 0 0 5px var(--folder-border);
+            border-radius: 5px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 5px;
+            /* Placeholder styling for the folder icon's inner graphic */
+            position: relative;
+        }
+        .folder-icon:after {
+            content: '💻'; /* Simple emoji placeholder for the icon */
+            position: absolute;
+            font-size: 2em;
+            filter: drop-shadow(0 0 2px var(--folder-border));
+        }
+
+        .folder-text {
+            color: var(--white-text);
+            font-size: 0.9em;
+            padding: 2px 0;
+        }
+
+        /* --- Terminal Windows --- */
+        .terminal-container {
+            position: absolute;
+            top: 50px;
+            right: 20px;
+        }
+
+        .terminal-window {
+            background-color: var(--terminal-bg);
+            border: 2px solid var(--terminal-border);
+            box-shadow: 0 0 10px rgba(255, 64, 129, 0.8), 0 0 20px rgba(0, 255, 156, 0.4);
+            position: absolute;
+            width: 450px;
+            min-height: 150px;
+            z-index: 20; /* Ensure terminals are over stars and folders */
+            font-size: 0.85em;
+        }
+
+        .window-header {
+            background-color: #2a2a2a;
+            padding: 5px;
+            display: flex;
+            align-items: center;
+            border-bottom: 1px solid var(--terminal-border);
+        }
+
+        .window-controls {
+            display: flex;
+            gap: 5px;
+            margin-right: 10px;
+        }
+
+        .control {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            display: inline-block;
+            cursor: pointer;
+        }
+        .control.red { background-color: var(--red-control); }
+        .control.yellow { background-color: var(--yellow-control); }
+        .control.green { background-color: var(--green-control); }
+
+        .window-title-bar {
+            color: var(--white-text);
+            text-align: center;
+            flex-grow: 1;
+            font-weight: bold;
+        }
+
+        .terminal-content {
+            padding: 10px;
+            white-space: pre-wrap; 
+        }
+
+        .line {
+            margin-bottom: 2px;
+            line-height: 1.2;
+        }
+
+        .prompt {
+            color: var(--prompt-user);
+        }
+        .prompt:before {
+            content: 'user@vile-host://window ';
+            color: var(--prompt-path);
+        }
+        .white-text {
+            color: var(--white-text);
+        }
+
+        .output-line {
+            color: var(--terminal-text);
+            text-indent: 10px;
+        }
+        .output-line:first-of-type {
+            margin-top: 5px;
+        }
+
+        /* Cursor Blink Effect */
+        .cursor {
+            display: inline-block;
+            width: 8px;
+            height: 1.2em;
+            background-color: var(--terminal-text);
+            margin-left: 5px;
+            animation: blink 1s step-end infinite;
+        }
+
+        @keyframes blink {
+            from, to { opacity: 1; }
+            50% { opacity: 0; }
+        }
+
+        /* Positioning Terminals */
+        .terminal-1 {
+            top: 0;
+            right: 0;
+        }
+        .terminal-2 {
+            top: 250px;
+            right: 50px;
+            box-shadow: 0 0 8px rgba(255, 64, 129, 0.5), 0 0 15px rgba(0, 255, 156, 0.2);
+        }
+        .terminal-3 {
+            top: 500px;
+            left: 20px;
+            width: 400px; 
+            z-index: 30; /* Highest Z-index for the bottom-most window */
+        }
+
+
+        /* --- Bottom Dock --- */
+        .dock {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            padding: 10px 0;
+            background-color: var(--dock-bg);
+            display: flex;
+            justify-content: center;
+            z-index: 100;
+            box-shadow: 0 -5px 15px var(--dock-shadow);
+        }
+
+        .dock-separator {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 150px;
+            height: 2px;
+            background-color: var(--star-color);
+            box-shadow: 0 0 5px var(--star-color);
+        }
+
+        .dock-icons {
+            display: flex;
+            gap: 15px;
+        }
+
+        .dock-icon {
+            width: 40px;
+            height: 40px;
+            background-color: var(--folder-bg);
+            border: 1px solid var(--prompt-path);
+            border-radius: 5px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.5em;
+            cursor: pointer;
+            color: var(--white-text);
+        }
+
+        .dock-icon.active {
+            border-color: var(--terminal-border);
+            box-shadow: 0 0 8px var(--terminal-border);
+            background-color: #3e4854;
         }
     </style>
 </head>
 <body>
-    <div class="terminal-window">
-        <header>
-            <span class="window-title">user@vile-host:~$</span>
-            <div class="window-controls">
-                <span class="control-btn minimize"></span>
-                <span class="control-btn maximize"></span>
-                <span class="control-btn close"></span>
+
+    <div class="desktop" id="desktop">
+        <div class="top-bar">
+            <span class="window-title">index.html</span>
+            <span class="site-title">~~vile_personal site</span>
+            <span class="search-icon">🔍</span>
+        </div>
+        
+        <div class="folder-area">
+            <div class="folder-group">
+                <div class="folder-icon"></div>
+                <div class="folder-text">About Me</div>
             </div>
-        </header>
-        <div class="terminal-body">
-            <p><span class="prompt">$</span> **whoami**</p>
-            <p class="output">A curious developer and student of the void.</p>
-            <p><span class="prompt">$</span> **cat about.txt**</p>
-            <p class="output">
-                Welcome to my digital terminal. I'm building things, breaking things, and learning
-                along the way. My interests include low-level systems, minimalist design, and the
-                endless possibilities of the shell. This site is a small nod to the clean
-                aesthetic of terminal-based environments.
-            </p>
-            <p><span class="prompt">$</span> **ls -l projects**</p>
-            <pre class="output">
-total 8
-drwxr-xr-x 2 user users 4096 Jan 1 2022 dotfiles/ (My configuration files)
--rw-r--r-- 1 user users  128 Feb 5 2022 shell_scripts.sh (A collection of useful scripts)
-drwxr-xr-x 2 user users 4096 Mar 10 2022 minimal_editor/ (WIP vi-like text editor)
-            </pre>
-            <p><span class="prompt">$</span> **connect --links**</p>
-            <ul class="links">
-                <li><a href="#" target="_blank">GitHub</a></li>
-                <li><a href="#" target="_blank">LinkedIn</a></li>
-                <li><a href="#" target="_blank">Email</a></li>
-            </ul>
-            <p class="input-line"><span class="prompt">$</span> <span class="cursor">|</span></p>
+            <div class="folder-group">
+                <div class="folder-icon"></div>
+                <div class="folder-text">About Me</div>
+            </div>
+
+            <div class="folder-group">
+                <div class="folder-icon"></div>
+                <div class="folder-text">Projects</div>
+            </div>
+            <div class="folder-group">
+                <div class="folder-icon"></div>
+                <div class="folder-text">My Projects</div>
+            </div>
+
+            <div class="folder-group">
+                <div class="folder-icon"></div>
+                <div class="folder-text">Contact Info</div>
+            </div>
+            <div class="folder-group">
+                <div class="folder-icon"></div>
+                <div class="folder-text">Contact Info</div>
+            </div>
+        </div>
+
+        <div class="terminal-container">
+            <div class="terminal-window terminal-1">
+                <div class="window-header">
+                    <div class="window-controls">
+                        <span class="control red"></span>
+                        <span class="control yellow"></span>
+                        <span class="control green"></span>
+                    </div>
+                    <span class="window-title-bar">terminal-window</span>
+                </div>
+                <div class="terminal-content">
+                    <div class="line prompt"><span class="white-text">user:!lill bet s kwtmdwe</span></div>
+                    <div class="line">moth lns blgging"s or sfssnt on to bont cenries"))</div>
+                    <div class="line">recte &s coonsfSsmas lDent!.</div>
+                    <div class="line">faerretlon mtges. lab to aneelaint scto slaba cloe</div>
+                    <div class="line prompt">>rpl sflce hont on sid lof ouf dandgl:(:"-bags "))</div>
+                </div>
+            </div>
+
+            <div class="terminal-window terminal-2">
+                <div class="window-header">
+                    <div class="window-controls">
+                        <span class="control red"></span>
+                        <span class="control yellow"></span>
+                        <span class="control green"></span>
+                    </div>
+                    <span class="window-title-bar">terminal-window</span>
+                </div>
+                <div class="terminal-content">
+                    <div class="line prompt"><span class="white-text">user:!lill bet s kwtmdwe</span></div>
+                    <div class="line">Prompt:</div>
+                    <div class="line prompt">lcnar sutaise to cotput:!</div>
+                </div>
+            </div>
+
+            <div class="terminal-window terminal-3">
+                <div class="window-header">
+                    <div class="window-controls">
+                        <span class="control red"></span>
+                        <span class="control yellow"></span>
+                        <span class="control green"></span>
+                    </div>
+                    <span class="window-title-bar">terminal-window</span>
+                </div>
+                <div class="terminal-content">
+                    <div class="line prompt"><span class="white-text">merter or snsilfsiare's sts cotput ")_bags ")</span></div>
+                    <div class="line">Protetgt:</div>
+                    <div class="line prompt">'s arvl-cnndle l m wlt ")</div>
+                    <div class="line">oUtpSt:</div>
+                    <div class="line output-line">links co output</div>
+                    <div class="line output-line">tare-l:!sc!ttest_fldunt tun test-id omteriale'))</div>
+                    <div class="cursor"></div>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="dock">
+            <div class="dock-separator"></div>
+            <div class="dock-icons">
+                <div class="dock-icon">🗃️</div>
+                <div class="dock-icon">🗃️</div>
+                <div class="dock-icon">🗃️</div>
+                <div class="dock-icon active">🗎</div>
+                <div class="dock-icon">📂</div>
+                <div class="dock-icon">⬇️</div>
+                <div class="dock-icon">🕓</div>
+                <div class="dock-icon">👤</div>
+            </div>
         </div>
     </div>
 
-    <div id="star-field"></div>
-    
     <script>
-        /* --- JavaScript for Star Effect --- */
-        document.addEventListener('mousemove', function(e) {
-            const starField = document.getElementById('star-field');
-            const colors = ['#ff7f00', '#ff00ff', '#00ffff', '#ffff00']; // Matching CSS --star-colors
+        document.addEventListener('mousemove', (e) => {
+            // Array of neon colors matching the aesthetic
+            const colors = [
+                '#ff4081', // Pink/Magenta
+                '#00ff9c', // Green/Cyan
+                '#c592ff', // Purple
+                '#ffbd2e'  // Yellow/Orange
+            ];
 
-            // Create a new star element
+            // Select a random color from the array
+            const color = colors[Math.floor(Math.random() * colors.length)];
+
+            // Create the star element
             const star = document.createElement('div');
-            star.className = 'star';
-
-            // Randomly select a color
-            const randomColor = colors[Math.floor(Math.random() * colors.length)];
-            star.style.backgroundColor = randomColor;
-
-            // Set initial position to the cursor's current location
-            star.style.left = `${e.clientX}px`;
-            star.style.top = `${e.clientY}px`;
-
-            // Apply the star size and initial opacity
-            const size = Math.random() * 5 + 3; // Star size between 3px and 8px
-            star.style.width = `${size}px`;
-            star.style.height = `${size}px`;
-            star.style.opacity = 1;
-            star.style.transform = `scale(1)`;
+            star.classList.add('star-trail');
             
-            // Append star to the container
-            starField.appendChild(star);
-
-            // --- Animation Setup ---
+            // Set the star's position based on the mouse coordinates
+            // We subtract half the star's width/height (5px) to center it on the cursor
+            star.style.left = `${e.clientX - 5}px`;
+            star.style.top = `${e.clientY - 5}px`;
             
-            // Define a random end position for the "fall" effect
-            const directionX = (Math.random() - 0.5) * 200; // X offset: -100 to 100
-            const directionY = 100 + Math.random() * 200; // Y offset: 100 to 300 (falling down)
+            // Set the star's color using the currentColor property in CSS
+            star.style.color = color;
 
-            // Set CSS custom properties for the animation
-            star.style.setProperty('--end-x', `${directionX}px`);
-            star.style.setProperty('--end-y', `${directionY}px`);
+            // Append the star to the body/desktop element
+            document.getElementById('desktop').appendChild(star);
 
-            // Apply the animation
-            star.style.animation = `fall 1s ease-out forwards`;
-
-            // Remove the element after the animation is complete (1 second)
+            // Remove the star after the animation completes (0.8s, matching the CSS animation duration)
             setTimeout(() => {
                 star.remove();
-            }, 1000);
+            }, 800);
         });
     </script>
 </body>
