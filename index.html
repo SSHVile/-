@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>~/.vile_personal_site</title>
+    
+    <style>
+        /* --- CSS Styles --- */
+        
+        :root {
+            --bg-color: #121212; /* Dark background */
+            --text-color: #00ff00; /* Green terminal text */
+            --accent-color: #00cc00; /* Slightly different green for prompts */
+            --window-border: #333;
+            --star-colors: #ff7f00, #ff00ff, #00ffff, #ffff00; /* Colorful stars */
+        }
+
+        /* Global Styles */
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: 'Courier New', monospace; /* Monospaced font for the terminal look */
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+            overflow: hidden; /* Prevent scrollbars due to stars */
+        }
+
+        /* Terminal Window Styling */
+        .terminal-window {
+            width: 80%;
+            max-width: 800px;
+            border: 1px solid var(--window-border);
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+            background-color: #1e1e1e; /* Slightly lighter dark for the terminal */
+            border-radius: 8px;
+            overflow: hidden;
+            margin-top: 5vh;
+            z-index: 10; /* Ensure terminal is above stars */
+            position: relative;
+        }
+
+        header {
+            background-color: var(--window-border);
+            padding: 5px 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #444;
+        }
+
+        .window-title {
+            font-size: 0.9em;
+            color: #ccc;
+        }
+
+        .window-controls .control-btn {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-left: 5px;
+        }
+
+        .minimize { background-color: #ffbd4a; }
+        .maximize { background-color: #00ca4e; }
+        .close { background-color: #ff605c; }
+
+        /* Terminal Body Content */
+        .terminal-body {
+            padding: 15px;
+            white-space: pre-wrap;
+            line-height: 1.4;
+            font-size: 1em;
+        }
+
+        .prompt {
+            color: var(--accent-color);
+            margin-right: 5px;
+        }
+
+        .output {
+            margin: 5px 0 10px 0;
+            padding-left: 15px; /* Indent output slightly */
+        }
+
+        pre.output {
+            background-color: #151515; /* Subtle dark background for file list */
+            padding: 10px;
+            border-left: 2px solid var(--accent-color);
+            overflow-x: auto;
+        }
+
+        .links {
+            list-style-type: none;
+            padding-left: 15px;
+        }
+
+        .links li a {
+            color: var(--text-color);
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        .links li a:hover {
+            color: var(--accent-color);
+            text-decoration: underline;
+        }
+
+        /* Animated Cursor */
+        .cursor {
+            animation: blink-caret 1s step-end infinite;
+            font-weight: bold;
+            color: var(--text-color);
+        }
+
+        @keyframes blink-caret {
+            from, to { color: transparent }
+            50% { color: var(--text-color) }
+        }
+
+        /* Star Effect Container */
+        #star-field {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none; /* Allows clicks to pass through the stars */
+            z-index: 1; /* Keep it behind the main content */
+        }
+
+        /* Individual Star Styling (Initial state before JS animation) */
+        .star {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            border-radius: 50%;
+            opacity: 0;
+            transform: scale(0);
+        }
+
+        /* Star Fall Animation */
+        @keyframes fall {
+            to {
+                transform: translate(var(--end-x), var(--end-y)) scale(0);
+                opacity: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="terminal-window">
+        <header>
+            <span class="window-title">user@vile-host:~$</span>
+            <div class="window-controls">
+                <span class="control-btn minimize"></span>
+                <span class="control-btn maximize"></span>
+                <span class="control-btn close"></span>
+            </div>
+        </header>
+        <div class="terminal-body">
+            <p><span class="prompt">$</span> **whoami**</p>
+            <p class="output">A curious developer and student of the void.</p>
+            <p><span class="prompt">$</span> **cat about.txt**</p>
+            <p class="output">
+                Welcome to my digital terminal. I'm building things, breaking things, and learning
+                along the way. My interests include low-level systems, minimalist design, and the
+                endless possibilities of the shell. This site is a small nod to the clean
+                aesthetic of terminal-based environments.
+            </p>
+            <p><span class="prompt">$</span> **ls -l projects**</p>
+            <pre class="output">
+total 8
+drwxr-xr-x 2 user users 4096 Jan 1 2022 dotfiles/ (My configuration files)
+-rw-r--r-- 1 user users  128 Feb 5 2022 shell_scripts.sh (A collection of useful scripts)
+drwxr-xr-x 2 user users 4096 Mar 10 2022 minimal_editor/ (WIP vi-like text editor)
+            </pre>
+            <p><span class="prompt">$</span> **connect --links**</p>
+            <ul class="links">
+                <li><a href="#" target="_blank">GitHub</a></li>
+                <li><a href="#" target="_blank">LinkedIn</a></li>
+                <li><a href="#" target="_blank">Email</a></li>
+            </ul>
+            <p class="input-line"><span class="prompt">$</span> <span class="cursor">|</span></p>
+        </div>
+    </div>
+
+    <div id="star-field"></div>
+    
+    <script>
+        /* --- JavaScript for Star Effect --- */
+        document.addEventListener('mousemove', function(e) {
+            const starField = document.getElementById('star-field');
+            const colors = ['#ff7f00', '#ff00ff', '#00ffff', '#ffff00']; // Matching CSS --star-colors
+
+            // Create a new star element
+            const star = document.createElement('div');
+            star.className = 'star';
+
+            // Randomly select a color
+            const randomColor = colors[Math.floor(Math.random() * colors.length)];
+            star.style.backgroundColor = randomColor;
+
+            // Set initial position to the cursor's current location
+            star.style.left = `${e.clientX}px`;
+            star.style.top = `${e.clientY}px`;
+
+            // Apply the star size and initial opacity
+            const size = Math.random() * 5 + 3; // Star size between 3px and 8px
+            star.style.width = `${size}px`;
+            star.style.height = `${size}px`;
+            star.style.opacity = 1;
+            star.style.transform = `scale(1)`;
+            
+            // Append star to the container
+            starField.appendChild(star);
+
+            // --- Animation Setup ---
+            
+            // Define a random end position for the "fall" effect
+            const directionX = (Math.random() - 0.5) * 200; // X offset: -100 to 100
+            const directionY = 100 + Math.random() * 200; // Y offset: 100 to 300 (falling down)
+
+            // Set CSS custom properties for the animation
+            star.style.setProperty('--end-x', `${directionX}px`);
+            star.style.setProperty('--end-y', `${directionY}px`);
+
+            // Apply the animation
+            star.style.animation = `fall 1s ease-out forwards`;
+
+            // Remove the element after the animation is complete (1 second)
+            setTimeout(() => {
+                star.remove();
+            }, 1000);
+        });
+    </script>
+</body>
+</html>
