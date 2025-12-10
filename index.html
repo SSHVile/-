@@ -1,668 +1,485 @@
 <!DOCTYPE html>
 <html lang="en">
+<!-- © 2025 macOS Style Webpage. Created by Hamza Atig - my website: atig.me . This project is a visual recreation inspired by Apple's macOS. All trademarks are property of their respective owners.   -->
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>macOS Desktop Simulation</title>
-    
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
-    
+    <title>QuantumOS - Pinnacle Edition</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/color-thief/2.3.0/color-thief.umd.js"></script>
+
     <style>
-        /* --- CSS Variables: macOS Colors --- */
-        :root {
-            /* General Mac colors */
-            --bg-color: #3d5a80; /* A soothing background color, not entirely black */
-            --menu-bar-bg: rgba(255, 255, 255, 0.9);
-            --menu-bar-text: #000000;
-            --dock-bg: rgba(255, 255, 255, 0.15); /* Slightly transparent dock */
-            --window-bg: #ececec;
-            --window-header-bg: #f8f8f8;
-            --window-border: #bbbbbb;
-            --window-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-            --font-family: 'Roboto', 'Helvetica Neue', 'Arial', sans-serif;
-
-            /* Window Controls */
-            --red-close: #ff5f57;
-            --yellow-minimize: #ffbd2e;
-            --green-maximize: #27c93f;
-
-            /* Star Trail (Kept the neon effect for visual contrast/user request) */
-            --star-color-1: #00bcd4; /* Cyan */
-            --star-color-2: #ff4081; /* Pink */
+        body {
+            background-image: url('https://4kwallpapers.com/images/walls/thumbs_3t/1432.jpg');
+            background-color: #111827;
+            background-size: cover;
+            background-position: center;
+            user-select: none;
         }
 
-        /* --- Base Reset and Desktop --- */
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
+        .liquid-glass {
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.5);
         }
 
-        html, body {
+        .glass-effect {
+            position: absolute;
+            inset: 0;
+            z-index: 1;
+            backdrop-filter: blur(8px);
+            filter: url(#glass-distortion);
+            isolation: isolate;
+        }
+
+        .glass-tint {
+            position: absolute;
+            inset: 0;
+            z-index: 2;
+            background-image: linear-gradient(to top right, var(--glass-bg-start, rgba(30, 25, 25, 0.4)), var(--glass-bg-end, rgba(30, 25, 25, 0.2)));
+            border: 1px solid var(--glass-border, rgba(255, 255, 255, 0.1));
+            transition: background-image 0.5s ease, border-color 0.5s ease;
+        }
+
+        .glass-shine {
+            position: absolute;
+            inset: 0;
+            z-index: 3;
+            box-shadow: inset 1px 1px 1px 0 rgba(255, 255, 255, 0.2), inset -1px -1px 2px 0 rgba(0, 0, 0, 0.2);
+        }
+
+        .glass-content {
+            position: relative;
+            z-index: 4;
             height: 100%;
-            overflow: hidden; 
-            font-family: var(--font-family);
-        }
-
-        .desktop {
-            position: relative;
-            width: 100vw;
-            height: 100vh;
-            background-color: var(--bg-color); 
-        }
-
-        /* --- Star Trail Effect --- */
-        .star-trail {
-            position: absolute;
-            width: 8px; height: 8px;
-            background: transparent; border-radius: 50%;
-            pointer-events: none; opacity: 1; z-index: 10;
-            box-shadow: 0 0 1px 1px currentColor, 0 0 5px currentColor;
-            animation: fadeAndShrink 0.8s ease-out forwards;
-        }
-        @keyframes fadeAndShrink {
-            0% { transform: scale(1); opacity: 1; }
-            100% { transform: scale(0); opacity: 0; }
-        }
-
-        /* --- 1. Top Menu Bar (macOS Style) --- */
-        .top-bar {
-            position: absolute;
-            top: 0;
-            left: 0;
             width: 100%;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 4px 10px;
-            background-color: var(--menu-bar-bg);
-            z-index: 100;
-            color: var(--menu-bar-text);
-            font-size: 0.85em;
-            font-weight: 500;
-            /* Mac-style subtle blur */
-            backdrop-filter: saturate(180%) blur(20px);
-            -webkit-backdrop-filter: saturate(180%) blur(20px);
-            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
         }
-        .menu-left, .menu-right {
-            display: flex;
-            align-items: center;
+/* © 2025 macOS Style Webpage. Created by Hamza Atig - my website: atig.me . This project is a visual recreation inspired by Apple's macOS. All trademarks are property of their respective owners.   */
+        .simple-glass {
+            backdrop-filter: blur(32px) saturate(180%);
+            -webkit-backdrop-filter: blur(32px) saturate(180%);
+            background-color: rgba(30, 25, 25, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
+            transition: background-color 0.5s ease, border-color 0.5s ease;
         }
-        .menu-item {
-            cursor: pointer;
-            padding: 4px 8px;
-            margin-right: 2px;
-            border-radius: 4px;
+
+        .app-window,
+        .dropdown-menu {
+            position: absolute;
+            transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1.5), transform 0.3s cubic-bezier(0.4, 0, 0.2, 1.5);
+            will-change: transform, opacity;
         }
-        .menu-item:hover {
-            background-color: rgba(0, 0, 0, 0.1);
+
+        .dropdown-menu {
+            transform-origin: top;
         }
-        .site-title {
-            font-weight: 700;
-            margin-right: 15px;
-        }
-        .menu-right .menu-item {
-            margin-left: 15px;
-            margin-right: 0;
-        }
-        
-        /* System User Menu Dropdown */
-        .user-menu { position: relative; }
-        .user-menu-icon { font-size: 1.1em; }
-        .dropdown {
+
+        .hidden-item {
             display: none;
+        }
+
+        .active-window .liquid-glass {
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35), 0 0 0 2px rgba(96, 165, 250, 0.5);
+        }
+
+        .drag-handle {
+            cursor: grab;
+        }
+
+        .drag-handle:active {
+            cursor: grabbing;
+        }
+
+        .resize-handle {
             position: absolute;
-            top: 25px;
+            width: 1rem;
+            height: 1rem;
+            bottom: 0;
             right: 0;
-            background-color: var(--menu-bar-bg);
-            border: 1px solid var(--window-border);
-            border-radius: 8px;
-            box-shadow: var(--window-shadow);
-            min-width: 200px;
-            padding: 8px 0;
-            z-index: 101;
-            backdrop-filter: saturate(180%) blur(20px);
-            -webkit-backdrop-filter: saturate(180%) blur(20px);
-        }
-        .dropdown.active { display: block; }
-        .dropdown-item {
-            padding: 6px 15px;
-            cursor: pointer;
-            color: var(--menu-bar-text);
-            font-weight: 400;
-        }
-        .dropdown-item:hover {
-            background-color: var(--folder-blue); /* Highlight color */
-            color: white;
+            cursor: nwse-resize;
+            z-index: 10;
         }
 
-        /* --- 2. Desktop Icons (Simplified Mac Look) --- */
-        .icon-area {
-            position: absolute;
-            top: 40px; 
-            left: 10px;
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-            z-index: 5;
-        }
-
-        .desktop-icon-group {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            cursor: pointer;
-            text-align: center;
-            width: 80px; 
-            user-select: none;
-        }
-
-        .icon-graphic {
-            width: 45px;
-            height: 45px;
-            background-color: var(--folder-blue);
-            border-radius: 10px;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            margin-bottom: 5px;
-        }
-        .icon-graphic.folder { background-color: #5d9cec; } /* Blue for folders */
-        .icon-graphic.terminal { background-color: #4cd964; } /* Green for terminal */
-        
-        .icon-graphic span {
-            font-size: 2em;
-            color: white;
-            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
-        }
-
-        .icon-text {
-            color: white;
-            font-size: 0.75em;
-            text-shadow: 0 1px 1px rgba(0, 0, 0, 0.5); /* Text shadow for visibility */
-            padding: 2px 4px;
-            border-radius: 3px;
-        }
-        .desktop-icon-group:hover .icon-text {
-            background-color: var(--folder-blue); /* Highlight on hover */
-        }
-
-
-        /* --- 3. Window Styles (Finder/App Window) --- */
-        .window-container {
-            position: absolute;
-            top: 40px;
-            right: 0;
-            left: 0; 
-            bottom: 60px;
-        }
-
-        .window {
-            position: absolute; 
-            width: 600px;
-            height: 400px;
-            min-width: 200px;
-            min-height: 50px;
-            z-index: 20; 
-            resize: both; 
-            overflow: hidden;
-            background-color: var(--window-bg);
-            border-radius: 8px;
-            box-shadow: var(--window-shadow);
-            border: 1px solid var(--window-border);
-            display: block;
-        }
-        
-        /* Header and Controls (macOS Traffic Lights) */
-        .window-header {
-            background-color: var(--window-header-bg);
-            padding: 8px 10px;
-            display: flex;
-            align-items: center;
-            border-top-left-radius: 8px;
-            border-top-right-radius: 8px;
-            border-bottom: 1px solid var(--window-border);
-            cursor: grab; 
-        }
-
-        .window-controls {
-            display: flex;
-            gap: 7px;
-            margin-right: 15px;
-            padding-left: 5px; /* Space from the edge */
-        }
-
-        .control {
-            width: 12px; height: 12px; border-radius: 50%; display: inline-block; cursor: pointer;
-            transition: background-color 0.1s;
-        }
-        .control.red { background-color: var(--red-close); }
-        .control.yellow { background-color: var(--yellow-minimize); }
-        .control.green { background-color: var(--green-maximize); }
-        
-        /* Hover state for controls (shows the icons) */
-        .window-controls:hover .control {
-            /* You would typically use background images for the icons (x, -, +) */
-        }
-
-        .window-title-bar {
-            color: #333;
-            text-align: center;
-            flex-grow: 1;
-            font-weight: 500;
-            font-size: 0.9em;
-            user-select: none;
-        }
-        
-        /* Finder/Folder Window Content */
-        .folder-content {
-            padding: 10px;
-            display: flex;
-            flex-wrap: wrap;
-            gap: 20px;
-            align-items: flex-start;
-        }
-        .placeholder-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            width: 80px;
-            cursor: pointer;
-        }
-        .placeholder-icon {
-            font-size: 2.5em;
-            margin-bottom: 5px;
-        }
-        .placeholder-name {
-            font-size: 0.75em;
-            text-align: center;
-            color: #333;
-        }
-
-        /* Terminal Window Style (Slightly different border/color) */
-        .terminal-window {
-            background-color: #242424;
-            border: 1px solid #000;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-            color: #fff;
-            border-radius: 6px;
-        }
-        .terminal-window .window-header {
-            background-color: #333;
-            border-bottom: 1px solid #111;
-        }
-        .terminal-window .window-title-bar {
-            color: #ccc;
-        }
-        .terminal-content {
-            padding: 10px;
-            font-family: monospace;
-            white-space: pre-wrap;
-            font-size: 0.9em;
-        }
-        .line { margin-bottom: 2px; line-height: 1.2; }
-        .prompt { color: #4cd964; } /* Green prompt */
-        .prompt:before { content: 'user@host ~ % '; color: #9c9c9c; }
-        .cursor { display: inline-block; width: 8px; height: 1.2em; background-color: #fff; margin-left: 5px; animation: blink 1s step-end infinite; }
-        @keyframes blink { from, to { opacity: 1; } 50% { opacity: 0; } }
-        
-        /* Minimized State */
-        .window.minimized {
-            height: 30px;
-            min-height: 30px;
-            overflow: hidden;
-            border-radius: 8px;
-            cursor: pointer;
-            resize: none;
-        }
-        .window.minimized .window-header { border-bottom: none; }
-        .window.minimized .folder-content, .window.minimized .terminal-content { display: none; }
-        
-        /* Initial Window Positions */
-        #window-about { top: 100px; left: 200px; }
-        #window-terminal-1 { top: 150px; left: 700px; width: 500px; height: 300px; }
-        #window-terminal-2 { top: 400px; left: 800px; width: 450px; height: 250px; }
-        #window-terminal-3 { display: none; }
-
-
-        /* --- 4. Bottom Dock (Centered, Mac-style) --- */
-        .dock {
-            position: fixed;
-            bottom: 5px; 
-            left: 50%;
-            transform: translateX(-50%);
-            padding: 8px 15px;
-            background-color: var(--dock-bg);
-            border-radius: 15px;
-            display: flex;
-            justify-content: center;
-            z-index: 100;
-            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.5);
-            backdrop-filter: blur(20px); 
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-        }
-
-        .dock-icons { display: flex; gap: 10px; }
         .dock-icon {
-            width: 50px; height: 50px; 
-            background-color: transparent;
-            border-radius: 12px; 
-            display: flex;
-            justify-content: center;
-            align-items: center; 
-            font-size: 2.2em;
-            cursor: pointer; 
-            transition: transform 0.2s cubic-bezier(0.4, 0.0, 0.2, 1);
-            position: relative;
+            transition: transform 0.15s cubic-bezier(0.4, 0, 0.2, 1.5), z-index 0s step;
         }
-        .dock-icon:hover {
-            transform: scale(1.3); /* Mac-style zoom */
-        }
-        .dock-icon.active:after {
-            content: '';
+
+        .active-indicator {
             position: absolute;
             bottom: -8px;
-            width: 4px;
-            height: 4px;
-            background-color: #fff;
-            border-radius: 50%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 6px;
+            height: 6px;
+            background-color: rgba(230, 230, 255, 0.9);
+            border-radius: 9999px;
+            box-shadow: 0 0 5px rgba(200, 200, 255, 0.8);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .active-indicator.visible {
+            opacity: 1;
+        }
+
+        @keyframes jiggle {
+
+            0%,
+            100% {
+                transform: translateX(0);
+            }
+
+            25% {
+                transform: translateX(-3px) rotate(-2deg);
+            }
+
+            75% {
+                transform: translateX(3px) rotate(2deg);
+            }
+        }
+
+        .jiggle-animation {
+            animation: jiggle 0.3s ease-in-out;
+        }
+
+        /* CORRECTED & FINAL Photo Grid Styles */
+
+        /* Animation now only contains rotation */
+        @keyframes smooth-zigzag {
+
+            0%,
+            100% {
+                transform: rotate(-1.5deg);
+            }
+
+            50% {
+                transform: rotate(1.5deg);
+            }
+        }
+
+        .photo-grid {
+            perspective: 800px;
+            padding: 2rem 1rem;
+        }
+
+        .photo-item {
+            transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1.5), opacity 0.35s ease;
+            position: relative;
+        }
+
+        /* Make other items flow/recede */
+        .photo-grid:hover .photo-item:not(:hover) {
+            transform: scale(0.9);
+            opacity: 0.6;
+        }
+
+        /* The container lifts and scales, but does NOT animate */
+        .photo-item:hover {
+            z-index: 10;
+            transform: translateY(-20px) scale(1.15);
+        }
+
+        .photo-item img {
+            transition: box-shadow 0.3s ease;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 0.5rem;
+        }
+
+        /* The image INSIDE the container gets the animation */
+        .photo-item:hover img {
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
+            animation: smooth-zigzag 1.8s ease-in-out infinite;
+        }
+
+        /* The floating side menu */
+        .swim-menu {
+            position: absolute;
+            top: 0;
+            /* Sit flush against the parent, eliminating the gap */
+            left: 100%;
+            width: 216px;
+            /* 200px + 1rem margin */
+            opacity: 0;
+            transform: translateX(-10px);
+            transition: opacity 0.3s ease 0.1s, transform 0.3s ease 0.1s;
+            pointer-events: none;
+            z-index: 20;
+        }
+
+        .photo-item:hover .swim-menu {
+            opacity: 1;
+            transform: translateX(0);
+            pointer-events: auto;
+        }
+
+        .swim-menu-item {
+            display: flex;
+            align-items: center;
+            padding: 0.5rem 0.75rem;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            color: #e5e7eb;
+            /* text-gray-200 */
+            transition: background-color 0.2s, color 0.2s;
+            cursor: pointer;
+            text-decoration: none;
+        }
+
+        .swim-menu-item:hover {
+            background-color: #3b82f6;
+            color: white;
+        }
+
+        .swim-menu-item svg {
+            width: 1.125rem;
+            height: 1.125rem;
+            margin-right: 0.75rem;
         }
     </style>
 </head>
-<body>
 
-    <div class="desktop" id="desktop">
-        <div class="top-bar">
-            <div class="menu-left">
-                <span class="menu-item site-title"></span>
-                <span class="menu-item" data-action="new-page" data-page="Finder">Finder</span>
-                <span class="menu-item" data-action="new-page" data-page="File">File</span>
-                <span class="menu-item" data-action="new-page" data-page="Edit">Edit</span>
+<body class="min-h-screen text-gray-200 font-sans relative overflow-hidden">
+
+    <svg style="position: absolute; width: 0; height: 0;">
+        <filter id="glass-distortion">
+            <feTurbulence type="fractalNoise" baseFrequency="0.05 0.05" numOctaves="3" result="noise" />
+            <feDisplacementMap in="SourceGraphic" in2="noise" scale="8" />
+        </filter>
+    </svg>
+
+    <img id="bg-image-source" src="https://4kwallpapers.com/images/walls/thumbs_3t/1432.jpg" crossorigin="anonymous" class="hidden"
+        alt="background source" />
+
+    <div id="desktop-container" class="relative min-h-screen">
+        <header class="fixed top-0 left-0 right-0 z-[60] h-8 bg-black/30 backdrop-filter backdrop-blur-xl">
+            <div class="mx-auto px-4 h-full flex items-center justify-between text-sm text-gray-200">
+                <nav class="flex items-center space-x-1"><a href="#" class="nav-item p-1.5 rounded hover:bg-white/10"
+                        data-app="about-window"><svg xmlns="http://www.w3.org/2000/svg" xml:space="preserve"
+                            class="h-5 w-auto text-gray-100" viewBox="0 0 814 1000">
+                            <path
+                                d="M788.1 340.9c-5.8 4.5-108.2 62.2-108.2 190.5 0 148.4 130.3 200.9 134.2 202.2-.6 3.2-20.7 71.9-68.7 141.9-42.8 61.6-87.5 123.1-155.5 123.1s-85.5-39.5-164-39.5c-76.5 0-103.7 40.8-165.9 40.8s-105.6-57-155.5-127C46.7 790.7 0 663 0 541.8c0-194.4 126.4-297.5 250.8-297.5 66.1 0 121.2 43.4 162.7 43.4 39.5 0 101.1-46 176.3-46 28.5 0 130.9 2.6 198.3 99.2zm-234-181.5c31.1-36.9 53.1-88.1 53.1-139.3 0-7.1-.6-14.3-1.9-20.1-50.6 1.9-110.8 33.7-147.1 75.8-28.5 32.4-55.1 83.6-55.1 135.5 0 7.8 1.3 15.6 1.9 18.1 3.2.6 8.4 1.3 13.6 1.3 45.4 0 102.5-30.4 135.5-71.3z"
+                                fill="currentColor" />
+                        </svg></a><a href="#" class="nav-item font-bold px-2 py-0.5"
+                        data-target="finder-menu">Finder</a><a href="#"
+                        class="nav-item hover:bg-white/10 rounded px-2 py-0.5" data-target="file-menu">File</a><a
+                        href="#" class="nav-item hover:bg-white/10 rounded px-2 py-0.5" data-target="edit-menu">Edit</a>
+                </nav>
+                <div class="flex items-center space-x-4 text-gray-300"> <span id="current-time"
+                        class="font-medium tracking-wide"></span> </div>
             </div>
-            <div class="menu-right">
-                <span class="menu-item">Wi-Fi</span>
-                <span class="menu-item">Tue Dec 9 20:04</span>
-                <div class="user-menu">
-                    <span class="menu-item user-menu-icon" id="user-menu-btn">👤</span>
-                    <div class="dropdown" id="user-dropdown">
-                        <div class="dropdown-item" data-action="system">System Settings...</div>
-                        <div class="dropdown-item" data-action="lock">Lock Screen</div>
-                        <div class="dropdown-item" data-action="logout">Shut Down...</div>
-                    </div>
-                </div>
+        </header>
+
+        <div id="finder-menu" class="dropdown-menu hidden-item liquid-glass rounded-lg w-56"
+            style="top: 35px; left: 60px; z-index: 55;">
+            <div class="glass-effect"></div>
+            <div class="glass-tint rounded-lg"></div>
+            <div class="glass-shine rounded-lg"></div>
+            <div class="glass-content p-1"><a href="#"
+                    class="block px-3 py-1 text-sm rounded hover:bg-blue-500 hover:text-white"
+                    data-app="about-window">About This OS</a>
+                <hr class="border-white/10 my-1"><a href="#"
+                    class="block px-3 py-1 text-sm rounded hover:bg-blue-500 hover:text-white">Preferences...</a>
             </div>
         </div>
-        
-        <div class="icon-area">
-            <div class="desktop-icon-group" data-target-window="window-about">
-                <div class="icon-graphic folder"><span>📘</span></div>
-                <div class="icon-text">About Me</div>
-            </div>
-            <div class="desktop-icon-group" data-target-window="window-terminal-1">
-                <div class="icon-graphic terminal"><span>💻</span></div>
-                <div class="icon-text">Terminal</div>
-            </div>
+        <div id="file-menu" class="dropdown-menu hidden-item liquid-glass rounded-lg w-64"
+            style="top: 35px; left: 120px; z-index: 55;">
+            <div class="glass-effect"></div>
+            <div class="glass-tint rounded-lg"></div>
+            <div class="glass-shine rounded-lg"></div>
+            <div class="glass-content p-1"><a href="#"
+                    class="block px-3 py-1 text-sm rounded hover:bg-blue-500 hover:text-white">New Window</a><a href="#"
+                    class="block px-3 py-1 text-sm rounded hover:bg-blue-500 hover:text-white">New Folder</a></div>
+        </div>
+        <div id="edit-menu" class="dropdown-menu hidden-item liquid-glass rounded-lg w-56"
+            style="top: 35px; left: 170px; z-index: 55;">
+            <div class="glass-effect"></div>
+            <div class="glass-tint rounded-lg"></div>
+            <div class="glass-shine rounded-lg"></div>
+            <div class="glass-content p-1"><a href="#"
+                    class="block px-3 py-1 text-sm rounded hover:bg-blue-500 hover:text-white">Cut</a><a href="#"
+                    class="block px-3 py-1 text-sm rounded hover:bg-blue-500 hover:text-white">Copy</a><a href="#"
+                    class="block px-3 py-1 text-sm rounded hover:bg-blue-500 hover:text-white">Paste</a></div>
         </div>
 
-        <div class="window-container">
-            
-            <div class="window" id="window-about" data-window-id="window-about">
-                <div class="window-header">
-                    <div class="window-controls">
-                        <span class="control red close-btn" data-target="window-about"></span>
-                        <span class="control yellow minimize-btn" data-target="window-about"></span>
-                        <span class="control green"></span>
-                    </div>
-                    <span class="window-title-bar">About Me</span>
-                </div>
-                <div class="folder-content">
-                    <div class="placeholder-item"><div class="placeholder-icon">📄</div><div class="placeholder-name">My_Biography.rtf</div></div>
-                    <div class="placeholder-item"><div class="placeholder-icon">📁</div><div class="placeholder-name">Projects</div></div>
-                    <div class="placeholder-item"><div class="placeholder-icon">🖼️</div><div class="placeholder-name">Photos</div></div>
-                    <div class="placeholder-item"><div class="placeholder-icon">🔒</div><div class="placeholder-name">Secrets</div></div>
-                </div>
+        <main id="desktop" class="w-full h-screen p-4"></main>
+<!-- © 2025 macOS Style Webpage. Created by Hamza Atig - my website: atig.me . This project is a visual recreation inspired by Apple's macOS. All trademarks are property of their respective owners.   -->
+        <footer class="fixed bottom-0 left-0 right-0 h-28 flex justify-center items-end z-40 p-2 pointer-events-none">
+            <div id="dock-container"
+                class="simple-glass p-2 rounded-2xl flex items-end space-x-1 sm:space-x-2 pointer-events-auto">
+                <a href="#" data-app="safari-window" class="dock-icon relative"><img src="https://icons.iconarchive.com/icons/wineass/ios7-redesign/256/Safari-icon.png"
+                        class="w-10 h-10 sm:w-12 sm:h-12">
+                    <div class="active-indicator"></div>
+                </a>
+                <a href="#" data-app="app-store-window" class="dock-icon relative"><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/6/67/App_Store_%28iOS%29.svg/2048px-App_Store_%28iOS%29.svg.png"
+                        class="w-10 h-10 sm:w-12 sm:h-12">
+                    <div class="active-indicator"></div>
+                </a>
+                <a href="#" data-app="files-window" class="dock-icon relative"><img src="https://upload.wikimedia.org/wikipedia/commons/d/d6/Files_App_icon_iOS.png"
+                        class="w-10 h-10 sm:w-12 sm:h-12">
+                    <div class="active-indicator"></div>
+                </a>
+                <a href="#" data-app="photos-window" class="dock-icon relative"><img src="https://static.wikia.nocookie.net/logopedia/images/8/83/Apple_Photos_2025_III.png"
+                        class="w-10 h-10 sm:w-12 sm:h-12">
+                    <div class="active-indicator"></div>
+                </a>
+                <a href="#" data-app="weather-window" class="dock-icon relative"><img src="https://cdn.iconscout.com/icon/free/png-256/free-ios-weather-icon-svg-download-png-461610.png"
+                        class="w-10 h-10 sm:w-12 sm:h-12">
+                    <div class="active-indicator"></div>
+                </a>
+                <a href="#" data-app="notes-window" class="dock-icon relative"><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/f/fa/Apple_Notes_icon.svg/2048px-Apple_Notes_icon.svg.png"
+                        class="w-10 h-10 sm:w-12 sm:h-12">
+                    <div class="active-indicator"></div>
+                </a>
+                <a href="#" data-app="stocks-window" class="dock-icon relative"><img src="https://cdn-icons-png.flaticon.com/512/831/831273.png"
+                        class="w-10 h-10 sm:w-12 sm:h-12">
+                    <div class="active-indicator"></div>
+                </a>
+                <a href="#" data-app="photoshop-window" class="dock-icon relative"><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/af/Adobe_Photoshop_CC_icon.svg/2101px-Adobe_Photoshop_CC_icon.svg.png"
+                        class="w-10 h-10 sm:w-12 sm:h-12">
+                    <div class="active-indicator"></div>
+                </a>
+                <a href="#" data-app="illustrator-window" class="dock-icon relative"><img
+                        src="https://upload.wikimedia.org/wikipedia/commons/thumb/f/fb/Adobe_Illustrator_CC_icon.svg/2101px-Adobe_Illustrator_CC_icon.svg.png" class="w-10 h-10 sm:w-12 sm:h-12">
+                    <div class="active-indicator"></div>
+                </a>
+                <a href="#" data-app="xd-window" class="dock-icon relative"><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c2/Adobe_XD_CC_icon.svg/2101px-Adobe_XD_CC_icon.svg.png"
+                        class="w-10 h-10 sm:w-12 sm:h-12">
+                    <div class="active-indicator"></div>
+                </a>
+                <a href="#" data-app="after-effects-window" class="dock-icon relative"><img
+                        src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/cb/Adobe_After_Effects_CC_icon.svg/2101px-Adobe_After_Effects_CC_icon.svg.png" class="w-10 h-10 sm:w-12 sm:h-12">
+                    <div class="active-indicator"></div>
+                </a>
+                </a>
+                <a href="#" data-app="wix-window" class="dock-icon relative"><img src="https://cdn-icons-png.flaticon.com/512/5968/5968770.png"
+                        class="w-10 h-10 sm:w-12 sm:h-12">
+                    <div class="active-indicator"></div>
+                </a>
             </div>
-
-            <div class="window terminal-window" data-window-id="window-terminal-1">
-                <div class="window-header">
-                    <div class="window-controls">
-                        <span class="control red close-btn" data-target="window-terminal-1"></span>
-                        <span class="control yellow minimize-btn" data-target="window-terminal-1"></span>
-                        <span class="control green"></span>
-                    </div>
-                    <span class="window-title-bar">bash - 80x24</span>
-                </div>
-                <div class="terminal-content">
-                    <div class="line prompt">echo "Welcome to the simulated macOS terminal."</div>
-                    <div class="line">Welcome to the simulated macOS terminal.</div>
-                    <div class="line prompt">ls -l /Users/guest</div>
-                    <div class="line">drwxr-xr-x @ folder-about</div>
-                    <div class="line">drwxr-xr-x @ window-terminal-2</div>
-                    <div class="line prompt"><span class="cursor"></span></div>
-                </div>
-            </div>
-            
-            <div class="window terminal-window" data-window-id="window-terminal-2" style="display: none;">
-                <div class="window-header">
-                    <div class="window-controls">
-                        <span class="control red close-btn" data-target="window-terminal-2"></span>
-                        <span class="control yellow minimize-btn" data-target="window-terminal-2"></span>
-                        <span class="control green"></span>
-                    </div>
-                    <span class="window-title-bar">zsh - Log</span>
-                </div>
-                <div class="terminal-content">
-                    <div class="line prompt">cat log.txt</div>
-                    <div class="line">-- System Boot 20:00:00 --</div>
-                    <div class="line">Connection established.</div>
-                    <div class="line prompt"></div>
-                </div>
-            </div>
-
-        </div>
-
-        <div class="dock">
-            <div class="dock-icons">
-                <div class="dock-icon" data-window-id="window-about" data-action="toggle">📁</div>
-                <div class="dock-icon" data-window-id="window-terminal-1" data-action="toggle" class="active">🖥️</div>
-                <div class="dock-icon" data-window-id="window-terminal-2" data-action="toggle">📜</div>
-                <div class="dock-icon" data-action="external" data-link="https://apple.com" title="Apple Site">🌐</div>
-            </div>
-        </div>
+        </footer>
     </div>
 
+    <template id="app-window-template">
+        <div class="app-window hidden-item liquid-glass rounded-xl">
+            <div class="glass-effect"></div>
+            <div class="glass-tint rounded-xl"></div>
+            <div class="glass-shine rounded-xl"></div>
+            <div class="glass-content flex flex-col">
+                <header class="drag-handle flex items-center p-2.5 flex-shrink-0">
+                    <div class="flex space-x-2"><button
+                            class="close-btn w-3 h-3 bg-red-500 rounded-full hover:bg-red-400"></button>
+                        <div class="w-3 h-3 bg-yellow-500 rounded-full"></div>
+                        <div class="w-3 h-3 bg-green-500 rounded-full"></div>
+                    </div>
+                </header>
+                <div class="app-content-wrapper flex-grow overflow-hidden">
+                    <div class="app-content h-full"></div>
+                </div>
+                <div class="resize-handle"></div>
+            </div>
+        </div>
+    </template>
+
     <script>
-        // --- Shared Window Management Variables ---
-        const windowContainer = document.querySelector('.window-container');
-        const allWindows = document.querySelectorAll('.window');
-        let currentZIndex = 50; 
+        const appDB = {
+            "about-window": { content: { main: `<div class="p-8 text-center"><svg xmlns="http://www.w3.org/2000/svg" xml:space="preserve" class="h-24 w-auto text-gray-100 mx-auto mb-4" viewBox="0 0 814 1000"><path d="M788.1 340.9c-5.8 4.5-108.2 62.2-108.2 190.5 0 148.4 130.3 200.9 134.2 202.2-.6 3.2-20.7 71.9-68.7 141.9-42.8 61.6-87.5 123.1-155.5 123.1s-85.5-39.5-164-39.5c-76.5 0-103.7 40.8-165.9 40.8s-105.6-57-155.5-127C46.7 790.7 0 663 0 541.8c0-194.4 126.4-297.5 250.8-297.5 66.1 0 121.2 43.4 162.7 43.4 39.5 0 101.1-46 176.3-46 28.5 0 130.9 2.6 198.3 99.2zm-234-181.5c31.1-36.9 53.1-88.1 53.1-139.3 0-7.1-.6-14.3-1.9-20.1-50.6 1.9-110.8 33.7-147.1 75.8-28.5 32.4-55.1 83.6-55.1 135.5 0 7.8 1.3 15.6 1.9 18.1 3.2.6 8.4 1.3 13.6 1.3 45.4 0 102.5-30.4 135.5-71.3z" fill="currentColor"/></svg><h2 class="text-3xl font-bold text-white">MacOS</h2><p class="text-lg text-gray-300 mb-4">Version 3.0 (Pinnacle)</p></div>` }, options: { width: 'w-full max-w-md', height: 'auto' } },
+            "photos-window": {
+                content: {
+                    main: `<div class="flex h-full bg-black/10">
+                        <div class="w-48 p-2 space-y-1 flex-shrink-0 border-r border-white/10">
+                            <h3 class="px-2 text-xs text-gray-400 font-semibold">Library</h3>
+                            <a href="#" class="flex items-center space-x-2 p-2 rounded-lg bg-blue-500 text-white">
+                                <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M7 3a1 1 0 000 2h6a1 1 0 100-2H7zM4 7a1 1 0 011-1h10a1 1 0 110 2H5a1 1 0 01-1-1zM2 11a2 2 0 012-2h12a2 2 0 012 2v4a2 2 0 01-2-2H4a2 2 0 01-2-2v-4z"/></svg>
+                                <span>All Photos</span>
+                            </a>
+                            <a href="#" class="flex items-center space-x-2 p-2 rounded-lg hover:bg-white/10">
+                                <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clip-rule="evenodd"/></svg>
+                                <span>Favorites</span>
+                            </a>
+                        </div>
+                        <div class="flex-grow overflow-y-auto">
+                            <div class="photo-grid grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                                ${[...Array(16)].map(() => {
+                        const randomId = Math.floor(Math.random() * 1000);
+                        const imageUrl = `https://picsum.photos/400/400?random=${randomId}`;
+                        const wallpaperUrl = `https://picsum.photos/1920/1080?random=${randomId}`;
+                        return `
+                                    <div class="photo-item relative aspect-square">
+                                        <img src="${imageUrl}" alt="Random photo" />
+                                        
+                                        <div class="swim-menu">
+                                            <!-- The margin here creates the visual gap, solving the hover issue -->
+                                            <div class="simple-glass rounded-lg p-2 ml-4">
+                                                <div class="space-y-1">
+                                                    <a href="#" data-set-wallpaper-src="${wallpaperUrl}" class="swim-menu-item" title="Set as Wallpaper">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path d="M5 5a2 2 0 012-2h8a2 2 0 012 2v8a2 2 0 01-2 2h-8a2 2 0 01-2-2V5zm3 4a1 1 0 000 2h2a1 1 0 100-2H8z"/></svg>
+                                                        <span>Set Wallpaper</span>
+                                                    </a>
+                                                    <a href="#" class="swim-menu-item" title="Share">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path d="M15 8a3 3 0 10-2.977-2.63l-4.94 2.47a3 3 0 100 4.319l4.94 2.47a3 3 0 10.895-1.789l-4.94-2.47a3.027 3.027 0 000-.74l4.94-2.47C13.456 7.68 14.19 8 15 8z" /></svg>
+                                                        <span>Share</span>
+                                                    </a>
+                                                    <a href="#" class="swim-menu-item" title="Add to Favorites">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clip-rule="evenodd" /></svg>
+                                                        <span>Favorite</span>
+                                                    </a>
+                                                    <hr class="border-white/10 my-1">
+                                                    <a href="#" class="swim-menu-item text-red-400 hover:bg-red-500 hover:text-white" title="Delete">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" /></svg>
+                                                        <span>Delete</span>
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    `;
+                    }).join('')}
+                            </div>
+                        </div>
+                    </div>`
+                },
+                options: { width: 'w-full max-w-4xl', height: 'h-[70vh]' }
+            },
+            "notes-window": {
+                content: {
+                    main: `<div class="flex h-full bg-black/10"><div class="w-56 p-2 space-y-1 flex-shrink-0 border-r border-white/10"><div class="flex justify-between items-center px-2 mb-2"><h3 class="text-xs text-gray-400 font-semibold">All Notes</h3><button class="text-blue-400 hover:text-blue-300">+</button></div><a href="#" class="block p-2 rounded-lg bg-blue-500/30"><h4 class="font-semibold truncate">Project Ideas</h4><p class="text-xs text-gray-400 truncate">Initial brainstorming for the MacOS project...</p></a><a href="#" class="block p-2 rounded-lg hover:bg-white/10"><h4 class="font-semibold truncate">Groceries</h4><p class="text-xs text-gray-400 truncate">Milk, bread, eggs, cheese...</p></a></div><div class="flex-grow flex flex-col"><textarea class="w-full h-full p-4 bg-transparent text-gray-200 focus:outline-none resize-none" spellcheck="false"># Project Ideas
 
-        // --- Utility Functions ---
-
-        /** Sets the target window to the highest z-index. */
-        function bringToFront(windowElement) {
-            currentZIndex++;
-            windowElement.style.zIndex = currentZIndex;
-        }
-
-        /** Toggles the minimized/visible state of a window. */
-        const toggleMinimizeWindow = (windowId) => {
-            const targetWindow = document.querySelector(`.window[data-window-id="${windowId}"]`);
-            if (!targetWindow) return;
-
-            bringToFront(targetWindow);
-
-            if (targetWindow.style.display === 'none') {
-                // Restore/Show from closed state
-                targetWindow.style.display = 'block';
-                targetWindow.classList.remove('minimized');
-            } else if (targetWindow.classList.contains('minimized')) {
-                // Restore from minimized
-                targetWindow.classList.remove('minimized');
-            } else {
-                // Minimize
-                targetWindow.classList.add('minimized');
-            }
+- Implement a hyper-realistic liquid glass effect.
+- Add a fully functional, multi-page App Store.
+- Ensure all windows are draggable and resizable.</textarea></div></div>` }, options: { width: 'w-full max-w-3xl', height: 'h-[60vh]' }
+            },
+            "weather-window": { content: { main: `<div class="p-6 text-center overflow-y-auto h-full"><h2 class="text-3xl font-semibold text-white">Cupertino</h2><p class="text-7xl font-thin text-white my-2">72°</p><p class="text-xl text-gray-300">Mostly Sunny</p><p class="text-lg text-white">H:75° L:58°</p><div class="my-4 overflow-x-auto whitespace-nowrap"><div class="inline-flex space-x-6 p-2">${[...Array(8)].map((_, i) => `<div class="text-center flex-shrink-0"><p class="text-sm">${(new Date().getHours() + i + 1) % 12 || 12} ${new Date().getHours() + i + 1 >= 12 ? 'PM' : 'AM'}</p><svg class="w-8 h-8 mx-auto my-1" viewBox="0 0 24 24" fill="currentColor"><path d="M12,2A1,1,0,0,1,13,3V4A1,1,0,0,1,11,4V3A1,1,0,0,1,12,2M20,11H21A1,1,0,0,1,21,13H20A1,1,0,0,1,20,11M3,11H4A1,1,0,0,1,4,13H3A1,1,0,0,1,3,11M12,7A5,5,0,0,0,7,12A5,5,0,0,0,12,17A5,5,0,0,0,17,12A5,5,0,0,0,12,7M6.34,6.34A1,1,0,0,1,7.76,4.93L8.46,5.64A1,1,0,0,1,7.05,7.05L6.34,6.34M17.66,6.34A1,1,0,0,1,19.07,7.76L18.36,8.46A1,1,0,0,1,16.95,7.05L17.66,6.34M19.07,16.24A1,1,0,0,1,17.66,17.66L16.95,16.95A1,1,0,1,1,18.36,15.54L19.07,16.24M4.93,16.24A1,1,0,0,1,6.34,17.66L7.05,16.95A1,1,0,0,1,5.64,15.54L4.93,16.24M12,20A1,1,0,0,1,11,21V22A1,1,0,0,1,13,22V21A1,1,0,0,1,12,20Z"/></svg><p class="font-bold">${72 + i}°</p></div>`).join('')}</div></div><div class="grid grid-cols-2 gap-4 p-4 border-t border-white/10 text-sm"><div class="p-2 bg-black/10 rounded-lg"><h3>Wind</h3><p class="text-2xl font-semibold">5<span class="text-base">mph</span></p></div><div class="p-2 bg-black/10 rounded-lg"><h3>Humidity</h3><p class="text-2xl font-semibold">45<span class="text-base">%</span></p></div></div></div>` }, options: { width: 'w-full max-w-sm', height: 'auto' } },
+            "safari-window": { content: { main: `<div class="flex flex-col h-full"><header class="p-2 flex items-center border-b border-white/10 flex-shrink-0 bg-black/10"><div class="flex space-x-1 text-gray-400"><button class="p-1 rounded-md"><svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd"/></svg></button></div><div class="flex-grow px-2"><div class="w-full bg-black/20 text-white rounded-lg px-3 py-1 text-sm text-center">google.com</div></div></header><div class="flex-grow bg-white"><iframe src="https://www.google.com/?igu=1" class="w-full h-full border-none" title="Google Search"></iframe></div></div>` }, options: { width: 'w-[80vw]', height: 'h-[85vh]' } },
+            "app-store-window": { content: { main: `<div class="p-4 overflow-y-auto h-full"><div class="rounded-lg overflow-hidden mb-6"><img src="https://images.unsplash.com/photo-1611162617474-5b21e879e113?w=800" class="w-full h-48 object-cover"></div><h2 class="text-2xl font-bold mb-2">Editor's Choice</h2><div class="flex space-x-4 overflow-x-auto pb-4">${[{ id: 1, name: 'Photo Editor Pro', cat: 'Graphics & Design', icon: './src/apps/photos.png' }, { id: 2, name: 'Weather Now', cat: 'Utilities', icon: './src/apps/weather.png' }].map(app => `<a href="#" class="flex-shrink-0 w-64 bg-black/10 p-4 rounded-lg hover:bg-white/5 transition-colors" data-navigate-to="app-store-detail-${app.id}"><div class="flex items-center"><img src="${app.icon}" class="w-12 h-12 rounded-lg mr-4"><div class="flex-grow"><h3 class="font-semibold">${app.name}</h3><p class="text-sm text-gray-400">${app.cat}</p></div><button class="bg-blue-600 text-white font-bold py-1 px-4 rounded-full">GET</button></div></a>`).join('')}</div></div>`, 'detail-1': `<div class="page-content h-full overflow-y-auto"><div class="p-4"><button class="text-blue-400 mb-4" data-navigate-to="main">< Back to App Store</button></div><div class="px-4 pb-4"><div class="flex items-center mb-4"><img src="./src/apps/photos.png" class="w-20 h-20 rounded-2xl mr-4"><div class="flex-grow"><h2 class="text-3xl font-bold">Photo Editor Pro</h2><p class="text-gray-400">The ultimate tool for creativity.</p></div><button class="bg-blue-600 text-white font-bold py-2 px-6 rounded-full self-start">GET</button></div></div></div>`, 'detail-2': `<div class="page-content h-full overflow-y-auto"><div class="p-4"><button class="text-blue-400 mb-4" data-navigate-to="main">< Back to App Store</button></div><div class="px-4 pb-4"><div class="flex items-center mb-4"><img src="./src/apps/weather.png" class="w-20 h-20 rounded-2xl mr-4"><div class="flex-grow"><h2 class="text-3xl font-bold">Weather Now</h2><p class="text-gray-400">Your daily forecast.</p></div><button class="bg-blue-600 text-white font-bold py-2 px-6 rounded-full self-start">GET</button></div></div></div>`, }, options: { width: 'w-full max-w-3xl', height: 'h-[80vh]' } },
         };
+// © 2025 macOS Style Webpage. Created by Hamza Atig - my website: atig.me . This project is a visual recreation inspired by Apple's macOS. All trademarks are property of their respective owners.  
+        const QuantumOS = {
+            highestZ: 10, openWindows: new Map(), activeWindowId: null, windowOffset: { x: 0, y: 0 },
 
-        /** Opens the target window if it's closed/minimized, otherwise brings it to front. */
-        const openWindow = (windowId) => {
-            const targetWindow = document.querySelector(`.window[data-window-id="${windowId}"]`);
-            if (targetWindow) {
-                targetWindow.style.display = 'block';
-                targetWindow.classList.remove('minimized');
-                bringToFront(targetWindow);
-            } else {
-                // Handle non-window links (Top Menu Bar)
-                alert(`Simulating Mac menu action: ${windowId}`);
-            }
+            init() { document.getElementById('desktop').addEventListener('click', e => { this.handleNavigation(e); this.handleWallpaperChange(e); }); this.initDock(); this.initNavbar(); this.initAdaptiveColors(); this.updateTime(); setInterval(() => this.updateTime(), 1000); },
+            initDock() { const dock = document.getElementById('dock-container'); dock.addEventListener('mousemove', e => { dock.querySelectorAll('.dock-icon').forEach(icon => { const r = icon.getBoundingClientRect(); const d = Math.abs((e.clientX - r.left) - r.width / 2); const s = Math.max(1, 1.7 - d / 120); icon.style.transform = `scale(${s}) translateY(${(s - 1) * -25}px)`; icon.style.zIndex = Math.floor(100 - d); }); }); dock.addEventListener('mouseleave', () => dock.querySelectorAll('.dock-icon').forEach(i => { i.style.transform = 'scale(1)'; i.style.zIndex = 'auto'; })); dock.querySelectorAll('.dock-icon').forEach(icon => icon.addEventListener('click', e => { e.preventDefault(); this.openApp(icon.dataset.app, icon); })); },
+            initNavbar() { document.querySelectorAll('.nav-item[data-target]').forEach(i => i.addEventListener('click', e => { e.preventDefault(); e.stopPropagation(); this.toggleDropdown(i.dataset.target); })); document.querySelectorAll('.dropdown-menu [data-app]').forEach(i => i.addEventListener('click', e => { e.preventDefault(); this.openApp(i.dataset.app, i); })); document.addEventListener('click', () => this.closeAllDropdowns()); },
+            toggleDropdown(id) { const menu = document.getElementById(id); const isVisible = !menu.classList.contains('hidden-item'); this.closeAllDropdowns(); if (!isVisible) menu.classList.remove('hidden-item'); },
+            closeAllDropdowns() { document.querySelectorAll('.dropdown-menu').forEach(menu => menu.classList.add('hidden-item')); },
+            openApp(appId, el) { if (this.openWindows.has(appId)) { this.setActiveWindow(this.openWindows.get(appId).element); return; } const appData = appDB[appId]; if (!appData) { el.classList.add('jiggle-animation'); el.addEventListener('animationend', () => el.classList.remove('jiggle-animation'), { once: true }); return; } const win = document.getElementById('app-window-template').content.cloneNode(true).firstElementChild; win.id = appId; win.classList.add(...appData.options.width.split(' '), ...appData.options.height.split(' ')); win.querySelector('.close-btn').addEventListener('click', e => { e.stopPropagation(); this.closeApp(appId); }); this.windowOffset.x = (this.windowOffset.x + 40) % 320; this.windowOffset.y = (this.windowOffset.y + 40) % 200; win.style.top = `calc(10% + ${this.windowOffset.y}px)`; win.style.left = `calc(10% + ${this.windowOffset.x}px)`; document.getElementById('desktop').appendChild(win); this.openWindows.set(appId, { element: win, currentPage: 'main' }); setTimeout(() => { this.makeDraggable(win); this.makeResizable(win); this.setActiveWindow(win); this.updateDockIndicators(); win.classList.remove('hidden-item'); this.renderAppContent(appId, 'main'); }, 10); },
+            renderAppContent(appId, pageKey) { const appState = this.openWindows.get(appId); const win = appState.element; const contentWrapper = win.querySelector('.app-content-wrapper'); const newContentDiv = document.createElement('div'); newContentDiv.className = 'app-content h-full'; newContentDiv.innerHTML = appDB[appId].content[pageKey]; contentWrapper.innerHTML = ''; contentWrapper.appendChild(newContentDiv); setTimeout(() => { newContentDiv.querySelectorAll('.stagger-item').forEach((item, index) => { setTimeout(() => item.classList.add('visible'), index * 30); }); }, 10); appState.currentPage = pageKey; },
+            handleNavigation(e) { const navEl = e.target.closest('[data-navigate-to]'); if (!navEl) return; e.preventDefault(); const winEl = navEl.closest('.app-window'); const appId = winEl.id; const targetPage = navEl.dataset.navigateTo; const contentWrapper = winEl.querySelector('.app-content-wrapper'); const currentContent = contentWrapper.firstElementChild; currentContent.style.opacity = 0; setTimeout(() => this.renderAppContent(appId, targetPage), 200); },
+            handleWallpaperChange(e) { const wallpaperBtn = e.target.closest('[data-set-wallpaper-src]'); if (!wallpaperBtn) return; e.preventDefault(); const url = wallpaperBtn.dataset.setWallpaperSrc; this.setWallpaper(url); },
+            setWallpaper(url) { document.body.style.backgroundImage = `url('${url}')`; document.getElementById('bg-image-source').src = url; this.initAdaptiveColors(); },
+            closeApp(appId) { const win = this.openWindows.get(appId)?.element; if (!win) return; win.classList.add('hidden-item'); this.openWindows.delete(appId); this.updateDockIndicators(); if (this.activeWindowId === appId) this.activeWindowId = null; setTimeout(() => win.remove(), 500); },
+            setActiveWindow(winEl) { if (!winEl || this.activeWindowId === winEl.id) return; document.querySelectorAll('.app-window').forEach(w => w.classList.remove('active-window')); winEl.classList.add('active-window'); winEl.style.zIndex = ++this.highestZ; this.activeWindowId = winEl.id; },
+            makeDraggable(el) { const handle = el.querySelector('.drag-handle'); handle.addEventListener('mousedown', e => { this.setActiveWindow(el); let isDragging = true, oX = e.clientX - el.offsetLeft, oY = e.clientY - el.offsetTop; const onMove = mE => { if (isDragging) { el.style.left = `${mE.clientX - oX}px`; el.style.top = `${mE.clientY - oY}px`; } }; const onUp = () => { isDragging = false; document.removeEventListener('mousemove', onMove); document.removeEventListener('mouseup', onUp); }; document.addEventListener('mousemove', onMove); document.addEventListener('mouseup', onUp); }); },
+            makeResizable(el) { const handle = el.querySelector('.resize-handle'); handle.addEventListener('mousedown', e => { e.stopPropagation(); this.setActiveWindow(el); const classesToRemove = [...el.classList].filter(c => c.startsWith('w-') || c.startsWith('h-') || c.startsWith('max-')); el.classList.remove(...classesToRemove); let isResizing = true; let iW = el.offsetWidth; el.style.width = `${iW}px`; let iH = el.offsetHeight; el.style.height = `${iH}px`; let iMX = e.clientX, iMY = e.clientY; const onMove = mE => { if (isResizing) { el.style.width = `${iW + (mE.clientX - iMX)}px`; el.style.height = `${iH + (mE.clientY - iMY)}px`; } }; const onUp = () => { isResizing = false; document.removeEventListener('mousemove', onMove); document.removeEventListener('mouseup', onUp); }; document.addEventListener('mousemove', onMove); document.addEventListener('mouseup', onUp); }); },
+            updateDockIndicators() { document.querySelectorAll('.dock-icon').forEach(icon => { const indicator = icon.querySelector('.active-indicator'); if (this.openWindows.has(icon.dataset.app)) indicator.classList.add('visible'); else indicator.classList.remove('visible'); }); },
+            updateTime() { const opts = { weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: 'numeric', hour12: true }; document.getElementById('current-time').textContent = new Intl.DateTimeFormat('en-US', opts).format(new Date()).replace(/,/g, ''); },
+            initAdaptiveColors() { const img = document.getElementById('bg-image-source'); const apply = () => { try { const [r, g, b] = new ColorThief().getColor(img); document.documentElement.style.setProperty('--glass-bg-start', `rgba(${r},${g},${b},0.5)`); document.documentElement.style.setProperty('--glass-bg-end', `rgba(${Math.max(r - 20, 0)},${Math.max(g - 20, 0)},${Math.max(b - 20, 0)},0.3)`); document.documentElement.style.setProperty('--glass-border', `rgba(${Math.min(r + 40, 255)},${Math.min(g + 40, 255)},${Math.min(b + 40, 255)},0.25)`); document.querySelector('.simple-glass').style.backgroundColor = `rgba(${r},${g},${b},0.4)`; document.querySelector('.simple-glass').style.borderColor = `rgba(${Math.min(r + 40, 255)},${Math.min(g + 40, 255)},${Math.min(b + 40, 255)},0.25)`; } catch (e) { console.error("Color Thief Error:", e, "Using fallback. Ensure image is local & has crossorigin='anonymous'."); } }; if (img.complete) apply(); else img.addEventListener('load', apply); }
         };
-
-        // --- 1. Star Trail Effect (Mouse Movement) ---
-        document.addEventListener('mousemove', (e) => {
-            const colors = [var(--star-color-1), var(--star-color-2)];
-            const color = colors[Math.floor(Math.random() * colors.length)];
-            const star = document.createElement('div');
-            star.classList.add('star-trail');
-            star.style.left = `${e.clientX - 4}px`; // Centered
-            star.style.top = `${e.clientY - 4}px`;
-            star.style.color = color;
-            document.getElementById('desktop').appendChild(star);
-            setTimeout(() => { star.remove(); }, 800);
-        });
-
-        // --- 2. Window Dragging ---
-        function makeWindowDraggable(windowElement, dragHandle) {
-            let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
-            
-            dragHandle.onmousedown = dragMouseDown;
-
-            function dragMouseDown(e) {
-                e = e || window.event;
-                if (windowElement.classList.contains('minimized')) return;
-                e.preventDefault();
-                pos3 = e.clientX;
-                pos4 = e.clientY;
-                document.onmouseup = closeDragElement;
-                document.onmousemove = elementDrag;
-                bringToFront(windowElement);
-            }
-
-            function elementDrag(e) {
-                e = e || window.event;
-                e.preventDefault();
-                pos1 = pos3 - e.clientX;
-                pos2 = pos4 - e.clientY;
-                pos3 = e.clientX;
-                pos4 = e.clientY;
-                
-                let newTop = windowElement.offsetTop - pos2;
-                let newLeft = windowElement.offsetLeft - pos1;
-
-                // Restrict movement to within the desktop/window-container
-                newTop = Math.max(0, Math.min(newTop, windowContainer.offsetHeight - 50));
-                newLeft = Math.max(0, Math.min(newLeft, windowContainer.offsetWidth - 50));
-
-                windowElement.style.top = newTop + "px";
-                windowElement.style.left = newLeft + "px";
-            }
-
-            function closeDragElement() {
-                document.onmouseup = null;
-                document.onmousemove = null;
-            }
-        }
-
-        // --- 3. Click Handlers and Initialization ---
-
-        // Initialize drag and bring to front for all windows
-        allWindows.forEach(window => {
-            const header = window.querySelector('.window-header');
-            makeWindowDraggable(window, header);
-            
-            window.addEventListener('mousedown', () => {
-                bringToFront(window);
-            });
-        });
-
-        // Close and Minimize Buttons
-        document.querySelectorAll('.close-btn').forEach(button => {
-            button.addEventListener('click', (e) => {
-                e.stopPropagation();
-                const targetId = e.target.getAttribute('data-target');
-                const targetWindow = document.querySelector(`.window[data-window-id="${targetId}"]`);
-                if (targetWindow) targetWindow.style.display = 'none';
-            });
-        });
-
-        document.querySelectorAll('.minimize-btn').forEach(button => {
-            button.addEventListener('click', (e) => {
-                e.stopPropagation();
-                const targetId = e.target.getAttribute('data-target');
-                toggleMinimizeWindow(targetId);
-            });
-        });
-
-        // Desktop Icons (Launch/Open Windows on double click)
-        document.querySelectorAll('.desktop-icon-group').forEach(group => {
-            group.addEventListener('dblclick', (e) => {
-                const targetId = group.getAttribute('data-target-window');
-                openWindow(targetId);
-            });
-        });
-
-        // Dock Icons (Toggle Windows and External Links)
-        document.querySelectorAll('.dock-icon').forEach(icon => {
-            icon.addEventListener('click', (e) => {
-                const action = icon.getAttribute('data-action');
-                
-                if (action === 'toggle') {
-                    const targetId = icon.getAttribute('data-window-id');
-                    toggleMinimizeWindow(targetId);
-                } else if (action === 'external') {
-                    const link = icon.getAttribute('data-link');
-                    window.open(link, '_blank'); 
-                }
-            });
-        });
-
-        // Top Menu Bar Navigation
-        document.querySelectorAll('.menu-item').forEach(item => {
-            if (item.getAttribute('data-action') === 'new-page') {
-                item.addEventListener('click', (e) => {
-                    const page = item.getAttribute('data-page');
-                    openWindow(page); 
-                });
-            }
-        });
-
-        // System User Menu Toggle
-        const userMenuBtn = document.getElementById('user-menu-btn');
-        const userDropdown = document.getElementById('user-dropdown');
-
-        userMenuBtn.addEventListener('click', (e) => {
-            e.stopPropagation(); 
-            userDropdown.classList.toggle('active');
-        });
-
-        // Close dropdown when clicking outside
-        document.body.addEventListener('click', () => {
-            if (userDropdown.classList.contains('active')) {
-                userDropdown.classList.remove('active');
-            }
-        });
-        
-        // System Menu Actions
-        document.querySelectorAll('.dropdown-item').forEach(item => {
-            item.addEventListener('click', (e) => {
-                const action = item.getAttribute('data-action');
-                alert(`Mac System Action: ${action}`);
-                userDropdown.classList.remove('active');
-            });
-        });
+        QuantumOS.init();
     </script>
 </body>
+<!-- © 2025 macOS Style Webpage. Created by Hamza Atig - my website: atig.me . This project is a visual recreation inspired by Apple's macOS. All trademarks are property of their respective owners.   -->
 </html>
